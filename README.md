@@ -1,4 +1,5 @@
 doly
 ====
 
-A javascript library.
+<p>一个基础库（未完成.）</p>
+<p>::不会像jQuery那样进行封装，只提供一些方法或者方式::</p>
