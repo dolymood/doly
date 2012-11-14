@@ -16,16 +16,16 @@
 	toStr           = Op.toString,
 	rmakeid         = /(#.+|\W)/g,
 	modules         = {}, // 模块加载器的缓存对象
-	loadings        = [],
+	loadings        = [], // 加载中的模块
 	rReadyState     = /loaded|complete|undefined/i,
 	hasOwnProperty  = Op.hasOwnProperty,
 	
 	STATUS = {
-        uninitialized : 0, //	未初始化：本包还未加载
-        loading       : 1, //	加载中：本包加载中
-        loaded        : 2, //	加载完成：本包加载完成，依赖包在加载中
-        interactive   : 3, //	待用：直接依赖包至少都是待用状态
-        complete      : 4  //	可用：本包已经完全可用
+        uninitialized : 0,
+        loading       : 1,
+        loaded        : 2,
+        interactive   : 3,
+        complete      : 4 
     },
 	
 	_config = {
@@ -70,7 +70,6 @@
 		type: type,
 		HTML: HTML,
 		HEAD: HEAD,
-		rword: /[^, ]+/g,
 		modules: modules,
 		
 		/*
@@ -249,16 +248,16 @@
 				deps = {},
 				tn = 0,
 				dn = 0,
-				i = 0, modLen, ary, url, ext, mod;
+				i = 0,
+				modLen, ary, url, ext, mod, key;
 			
 			if (len < 1) throw 'require called with no arguments';
-			
-			if (len == 1) {
-			    factory = list;
+			if (typeof list == 'string') list = [list];
+			if (len == 1 && type(list, 'Function')) {
+				factory = list;
 				list = [];
 			}
 			
-			if (typeof list == 'string') list = [list];
 			for (modLen = list.length; i < modLen; i++) {
 				ary = module.parse(list[i], base);
 				url = ary[0];
@@ -280,15 +279,11 @@
 					loadCSS(url);
 				}
 			}
-			
-			var key = (name && module.parse(name, base)[0]) || 'd_o_l_y' + (__id ++).toString(32);
-			
+			key = (name && module.parse(name, base)[0]) || 'd_o_l_y' + (__id ++).toString(32);
 			if (dn == tn) {
 			    return install(key, args, factory);
 			}
-			
 			module.update(key, START, factory, args, deps);
-			
 			loadings.unshift(key);
 			check();
 		}
@@ -333,12 +328,10 @@
 			deps = name;
 			name = null;
 		}
-		
 		if (type(deps, 'Function')) {
 		    factory = deps;
 			deps = [];
 		}
-		
 		// 有依赖包
 		if (deps) {
 		    deps = typeof deps == 'string' ? [deps] : deps;

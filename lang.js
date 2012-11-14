@@ -2,4 +2,8 @@
  * 
  */
 
-// define();
+define('lang', function() {
+    
+	
+	
+});
