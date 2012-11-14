@@ -25,7 +25,7 @@
         loading       : 1,
         loaded        : 2,
         interactive   : 3,
-        complete      : 4 
+        complete      : 4
     },
 	
 	_config = {
