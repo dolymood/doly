@@ -17,8 +17,11 @@
 	rmakeid         = /(#.+|\W)/g,
 	modules         = {}, // 模块加载器的缓存对象
 	loadings        = [], // 加载中的模块
+	interScript     = null,
 	rReadyState     = /loaded|complete|undefined/i,
+	baseElement     = HEAD.getElementsByTagName('base')[0],
 	hasOwnProperty  = Op.hasOwnProperty,
+	currentlyScript = null,
 	
 	STATUS = {
         uninitialized : 0,
@@ -103,7 +106,7 @@
 	(function(scripts) {
 		var //r = /(^|(?:.*?\/))doly\.js(?:\?|$)/,文件名可能被更改
 		    cur = scripts[scripts.length - 1],
-            url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
+            url = getScriptAbsoluteSrc(cur);
 		url = url.replace(/[?#].*/, '');
 		_config.baseUrl = url.substr(0, url.lastIndexOf('/')) + "/";
 	})(document.getElementsByTagName('script'));
@@ -176,6 +179,32 @@
 		
 	};
 	
+	function getScriptAbsoluteSrc(script) {
+	    return script.hasAttribute ?
+		           script.src : script.getAttribute( 'src', 4);
+	}
+	
+	function getCurrentScriptSrc() {
+	    
+		if (currentlyAddingScript) {
+		    return getScriptAbsoluteSrc(currentlyAddingScript);
+		}
+		
+		if (interScript && interScript.readyState === 'interactive') {
+		    return getScriptAbsoluteSrc(interScript);
+		}
+		
+		var scripts = HEAD.getElementsByTagName('script'),
+		    i = 0, script;
+		for (; i < scripts.length; i++) {
+		    script = scripts[i];
+		    if (script.readyState === 'interactive') {
+			    interScript = script
+			    return getScriptAbsoluteSrc(script);
+		    }
+		}
+	}
+	
 	function loadJS(url) {
 	    var script = document.createElement('script'),
 		    charset = _config.charset[url];
@@ -194,7 +223,9 @@
 			}
 		};
         script.src = url;
-		HEAD.appendChild(script);
+		baseElement ?
+			HEAD.insertBefore(script, baseElement) :
+			HEAD.appendChild(script);
 	}
 	
 	function loadCSS(url) {
@@ -322,7 +353,7 @@
 	 * factory的参数对应依赖模块的外部接口(exports)
 	 */
 	window.define = doly.define = function(name, deps, factory) {
-		
+		var currentSrc = '';
 		if (typeof name != 'string') {
 		    factory = deps;
 			deps = name;
