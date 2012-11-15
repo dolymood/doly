@@ -17,11 +17,12 @@
 	rmakeid         = /(#.+|\W)/g,
 	modules         = {}, // 模块加载器的缓存对象
 	loadings        = [], // 加载中的模块
-	interScript     = null,
+	interScript     = null, // IE
+	innerDefine     = null,
 	rReadyState     = /loaded|complete|undefined/i,
 	baseElement     = HEAD.getElementsByTagName('base')[0],
 	hasOwnProperty  = Op.hasOwnProperty,
-	currentlyScript = null,
+	currentlyScript = null, // IE
 	
 	STATUS = {
         uninitialized : 0,
@@ -205,21 +206,23 @@
 		}
 	}
 	
-	function loadJS(url) {
-	    var script = document.createElement('script'),
+	function loadJS(url, key) {
+		var script = document.createElement('script'),
 		    charset = _config.charset[url];
 		module.update(url, STATUS.loading);
+		modules[url].keys ? modules[url].keys.push[key] : modules[url].keys = [key];
 		script.async = 'async';
 		if (charset) {
 		    script.charset = charset;
 		}
 		
 		script.onload = script.onerror = script.onreadystatechange = function() {
-			if (rReadyState.test(script.readyState)) {            
+			if (rReadyState.test(script.readyState)) {
 				script.onload = script.onerror = script.onreadystatechange = null;
 				HEAD.removeChild(script);
+				check(key, script.src);
 				script = null;
-				check();
+				
 			}
 		};
         script.src = url;
@@ -241,7 +244,7 @@
         HEAD.insertBefore(link, HEAD.firstChild);
 	}
 	
-	function check() {
+	function check(id, src) {
 	    var i = 0,
 		    j = loadings.length,
 		    OK = STATUS.complete,
@@ -253,13 +256,18 @@
 			args = mod.args;
 			len = args.length;
 			factory = mod.factory;
-			for (; i < len; i++) {
-			    if (modules[args[i]].status != OK) {
+			for (i = 0; i < len; i++) {
+			    if (id && key == id) {
+				    if (args[i] == src) {
+					    
+					}
+				}
+				if (modules[args[i]].status != OK) {
 				    continue loop;
 				}
 			}
 			
-			if (mod.state != OK) {
+			if (mod.status != OK) {
 				loadings.splice(j, 1);
 				install(key, args, factory);
 				check();
@@ -274,7 +282,6 @@
 			    base = _config.baseUrl,
 				START = STATUS.loading,
 				OK = STATUS.complete,
-				UNINITIALIZED = STATUS.uninitialized,
 				args = [],
 				deps = {},
 				tn = 0,
@@ -288,7 +295,7 @@
 				factory = list;
 				list = [];
 			}
-			
+			key = (name && module.parse(name, base)[0]) || 'd_o_l_y' + (__id ++).toString(32);
 			for (modLen = list.length; i < modLen; i++) {
 				ary = module.parse(list[i], base);
 				url = ary[0];
@@ -298,7 +305,7 @@
 				if (ext == 'js') {
 					tn++;
 					if (!mod) {
-						loadJS(url);
+						loadJS(url, key);
 					} else if (mod.status == OK) {
 					    dn++;
 					}
@@ -310,7 +317,7 @@
 					loadCSS(url);
 				}
 			}
-			key = (name && module.parse(name, base)[0]) || 'd_o_l_y' + (__id ++).toString(32);
+			
 			if (dn == tn) {
 			    return install(key, args, factory);
 			}
@@ -352,8 +359,7 @@
 	 * @param {Function} 模块的内容
 	 * factory的参数对应依赖模块的外部接口(exports)
 	 */
-	window.define = doly.define = function(name, deps, factory) {
-		var currentSrc = '';
+	innerDefine = function(name, deps, factory) {
 		if (typeof name != 'string') {
 		    factory = deps;
 			deps = name;
@@ -369,7 +375,7 @@
 		}
 		doly.require(deps, factory, name);
 	};
-	
+	window.define = doly.define = innerDefine;
 	window.doly = doly;
 	
 }(window, document);

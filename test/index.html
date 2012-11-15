@@ -11,10 +11,9 @@
 		    baseUrl: './test/js/'
 		});
 		
-		doly.require(['base', 'module', 'js/module'], function(base, module, imodule) {
-		    console.log('index::module::' + module.output);
-			console.log('index::base::' + base.log);
-			console.log('index::imodule::' + imodule.output);
+		
+		doly.require(['define'], function(d) {
+		    console.log('index::define::' + d.log);
 		});
 	</script>
 </body>
