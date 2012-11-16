@@ -1,9 +1,9 @@
 /**
  * test path
  */
-define('js/module', ['base'], function(base) {
+define('module', ['../base'], function(base) {
     
-	console.log('test_path_require:::::'+ base.output);
+	doly.log('test_path_require:::::'+ base.output);
 	var test = {
 	    output: 'inner module done.'
 	};

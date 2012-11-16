@@ -3,7 +3,7 @@
  */
 
 define('base', function() {
-    console.log('test_define:::::' + 'done.');
+	doly.log('test_define:::::' + 'done.');
 	return {
 	    output: 'test done:::::'
 	};

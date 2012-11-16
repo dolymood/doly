@@ -12,11 +12,11 @@
 		    baseUrl: './test/js/'
 		});
 		$.require(['module', 'js/module'], function(module, innermodule) {
-		    console.log('index::module::' + module.output);
-			console.log('index::innermodule::' + innermodule.output);
+		    $.log('index::module::' + module.output);
+			$.log('index::innermodule::' + innermodule.output);
 		});
 		$.require(['define'], function(d) {
-		    console.log('index::define::' + d.output);
+		    $.log('index::define::' + d.output);
 		});
 	</script>
 </body>

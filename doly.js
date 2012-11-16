@@ -30,6 +30,7 @@
 	
 	_config = {
 	    baseUrl: '',
+		alias: {},
 		charset: {}
 	},
 	
@@ -90,10 +91,43 @@
 		 * @param {Object} ops 配置对象(charset || baseUrl)
 		 */
 		config: function(ops) {
-		    var charset = ops.charset;
+		    var charset = ops.charset,
+			    alias = ops.alias;
 			if (ops.baseUrl) _config.baseUrl = parseUrl(ops.baseUrl, _config.baseUrl);
 			if (charset && type(charset, 'Object')) {
 				_config.charset = doly.merge(_config.charset, charset);
+			}
+			if (alias && type(alias, 'Object')) {
+				_config.alias = doly.merge(_config.alias, alias);
+			}
+		},
+		// sea.js todo
+		log: function() {
+		    if (typeof console === 'undefined') return;
+
+			var args = Array.apply([], arguments);
+
+			var type = 'log';
+			var last = args[args.length - 1];
+			console[last] && (type = args.pop());
+
+			if (console[type].apply) {
+			    console[type].apply(console, args);
+			    return;
+			}
+
+			var length = args.length;
+			if (length === 1) {
+			    console[type](args[0]);
+			}
+			else if (length === 2) {
+			    console[type](args[0], args[1]);
+			}
+			else if (length === 3) {
+			    console[type](args[0], args[1], args[2]);
+			}
+			else {
+			    console[type](args.join(' '));
 			}
 		}
 
@@ -124,9 +158,9 @@
 			tmp = url.charAt(0);
 			st = url.slice(0, 2);
 			if (tmp !== '.' && tmp != '/') { //相对于根路径
-				modUrl = url;
+				modUrl = base + url;
 			} else if (st == './') { //相对于兄弟路径
-				modUrl = url.substr(2);
+				modUrl = (base[base.length - 1] == '/' ? base : (base + '/')) + url.substr(2);
 			} else if (st == '..') { //相对于父路径
 				arr = base.replace(/\/$/, '').split('/');
 				tmp = url.replace(/\.\.\//g, function() {
@@ -135,7 +169,6 @@
 				});
 				modUrl = arr.join('/') + '/' + tmp;
 			}
-			modUrl = base + modUrl;
 		}
 		return modUrl;
 	}
@@ -154,15 +187,19 @@
 		/*
 		 * 根据url得到文件地址
 		 * @param {String} url url
-		 * @param {String} base 基本url地址
+		 * @param {String} base 基于的url地址
 		 * @return {String} 解析后的文件地址
 		 */
 		parse: function(url, base) {
 		    var modUrl = '',
 			    ext = 'js',
 				tmp, st;
-				
-			modUrl = parseUrl(url, base);
+			if (/^[-a-z0-9_$]{2,}$/i.test(url) && _config.alias[url]) {
+				modUrl = _config.alias[url];
+			} else {
+			    base = base.substr(0, base.lastIndexOf('/')) + '/';
+				modUrl = parseUrl(url, base);
+			}
 			tmp = modUrl.replace(/[?#].*/, '');
 			if (/\.(\w+)$/.test(tmp)) {
 				ext = RegExp.$1;
@@ -181,44 +218,23 @@
 		           script.src : script.getAttribute( 'src', 4);
 	}
 	
-	function getCurrentScriptSrc() {
-	    
-		if (currentlyAddingScript) {
-		    return getScriptAbsoluteSrc(currentlyAddingScript);
-		}
-		
-		if (interScript && interScript.readyState === 'interactive') {
-		    return getScriptAbsoluteSrc(interScript);
-		}
-		
-		var scripts = HEAD.getElementsByTagName('script'),
-		    i = 0, script;
-		for (; i < scripts.length; i++) {
-		    script = scripts[i];
-		    if (script.readyState === 'interactive') {
-			    interScript = script
-			    return getScriptAbsoluteSrc(script);
-		    }
-		}
-	}
-	
-	function innerDefine() {
+	var innerDefine = function() {
 	    var args = Array.apply([], arguments),
 		    module = Ns.modules[nick],
-			last;
+			last, lastFunc;
         if (typeof args[0] == 'string') {
             args.shift();
         }
         args.unshift(nick);
         module.status = 1;
         last = args.length - 1;
-        if (typeof args[last] == "function") {
-            //劫持模块工厂,将$, exports, require, module等对象强塞进去
-			// args[last] = function() {
-			    
-			// };
-            // args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
-            // (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
+		lastFunc = args[last];
+        if (typeof lastFunc == "function") {
+			args[last] = function() {
+				doly = Ns;
+				return lastFunc.apply(parent, arguments);
+			};
+            // args[last] =  parent.Function('doly', 'return ' + args[last])(Ns);
         }
         Ns.define.apply(module, args);
 	}
@@ -232,7 +248,7 @@
 			    'doly.define = ', innerDefine, ';',
 				'var define = doly.define;',
 			'<\/script>',
-			'<script src="', url,'" ',
+			'<script src="', url + '?ts=' + Date.now(),'" ',
 			(charset ? ('charset="' + charset + '" '): ''),
 			(document.uniqueID ? 'onreadystatechange="' : 'onload="'),
 			    'if(/loaded|complete|undefined/i.test(this.readyState)){',
@@ -306,7 +322,7 @@
 	
 	mix(doly, {
 		
-		require: function(list, factory, name) {
+		require: function(list, factory, nameUrl) {
 		    var len = arguments.length,
 			    base = _config.baseUrl,
 				START = STATUS.loading,
@@ -326,7 +342,7 @@
 			}
 			// factory 中的require
 			for (modLen = list.length; i < modLen; i++) {
-				ary = module.parse(list[i], base);
+				ary = module.parse(list[i], nameUrl || base);
 				url = ary[0];
 				ext = ary[1];
 				mod = modules[url];
@@ -346,7 +362,7 @@
 					loadCSS(url);
 				}
 			}
-			key = name || 'd_o_l_y' + Date.now().toString(32);
+			key = nameUrl || 'd_o_l_y' + Date.now().toString(32);
 			if (dn == tn) {
 			    return install(key, args, factory);
 			}
@@ -361,8 +377,7 @@
 				OK = STATUS.complete,
 				key, deps, args, factory, len, mod;
 			loop:
-			for ( ; j--; ) {
-				key = loadings[j];
+			for ( ; key = loadings[--j]; ) {
 				mod = modules[key];
 				args = mod.args;
 				len = args.length;
@@ -383,8 +398,8 @@
 		checkFail: function(doc, url, error) {
 		    doc && (doc.ok = 1);
 			if (error || !modules[url].state) {
-				//$.log( (error || modules[ id ].state )+"   "+id, 3);
-				//this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
+				doly.log((error || modules[url].state) + "   " + url);
+				doly.log('Failed to load [[ ' + url + ' ]]' + modules[url].state);
 			}
 		}
 		
