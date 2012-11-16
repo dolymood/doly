@@ -3,7 +3,7 @@
  */
 define('js/module', ['base'], function(base) {
     
-	console.log('test_path_require.');
+	console.log('test_path_require:::::'+ base.output);
 	var test = {
 	    output: 'inner module done.'
 	};

@@ -9,7 +9,6 @@
 	Ap              = Array.prototype,
 	Op              = Object.prototype,
 	doly            = {},
-	__id            = 1000,
 	HTML            = document.documentElement,
 	HEAD            = document.head || document.getElementsByTagName('head')[0],
 	slice           = Ap.slice,
@@ -17,12 +16,9 @@
 	rmakeid         = /(#.+|\W)/g,
 	modules         = {}, // 模块加载器的缓存对象
 	loadings        = [], // 加载中的模块
-	interScript     = null, // IE
-	innerDefine     = null,
 	rReadyState     = /loaded|complete|undefined/i,
 	baseElement     = HEAD.getElementsByTagName('base')[0],
 	hasOwnProperty  = Op.hasOwnProperty,
-	currentlyScript = null, // IE
 	
 	STATUS = {
         uninitialized : 0,
@@ -206,11 +202,71 @@
 		}
 	}
 	
-	function loadJS(url, key) {
+	function innerDefine() {
+	    var args = Array.apply([], arguments),
+		    module = Ns.modules[nick],
+			last;
+        if (typeof args[0] == 'string') {
+            args.shift();
+        }
+        args.unshift(nick);
+        module.status = 1;
+        last = args.length - 1;
+        if (typeof args[last] == "function") {
+            //劫持模块工厂,将$, exports, require, module等对象强塞进去
+			// args[last] = function() {
+			    
+			// };
+            // args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
+            // (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
+        }
+        Ns.define.apply(module, args);
+	}
+	
+	function loadJS(url) {
+        var iframe = document.createElement('iframe'),
+		    charset = _config.charset[url],
+			codes = [
+			'<script>',
+			    'var nick ="', url, '", doly = {}, Ns = parent.doly;',
+			    'doly.define = ', innerDefine, ';',
+				'var define = doly.define;',
+			'<\/script>',
+			'<script src="', url,'" ',
+			(charset ? ('charset="' + charset + '" '): ''),
+			(document.uniqueID ? 'onreadystatechange="' : 'onload="'),
+			    'if(/loaded|complete|undefined/i.test(this.readyState)){',
+				    'Ns.check();',
+			        'Ns.checkFail(self.document, nick);',
+				'}',
+			    '" onerror="Ns.checkFail(self.document, nick, true);" >',
+			'<\/script>'],
+			doc;
+		module.update(url, STATUS.loading);
+        iframe.style.display = 'none';
+		// http://www.tech126.com/https-iframe/
+		// http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
+        if (!'1'[0]) { // IE6 iframe在https协议下没有的指定src会弹安全警告框
+            iframe.src = 'javascript:false';
+        }
+        HEAD.insertBefore(iframe, HEAD.firstChild);
+        doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.write(codes.join(''));
+        doc.close();
+		iframe.onload = function() {
+		    if (window.opera && doc.ok != 1) { // ok写在checkFail里面
+                doly.checkFail(doc, url, true);
+            }
+            doc.write('<body/>');
+            HEAD.removeChild(iframe);
+            iframe = null;
+		};
+	}
+	
+	function loadJS1(url) {
 		var script = document.createElement('script'),
 		    charset = _config.charset[url];
 		module.update(url, STATUS.loading);
-		modules[url].keys ? modules[url].keys.push[key] : modules[url].keys = [key];
 		script.async = 'async';
 		if (charset) {
 		    script.charset = charset;
@@ -220,9 +276,8 @@
 			if (rReadyState.test(script.readyState)) {
 				script.onload = script.onerror = script.onreadystatechange = null;
 				HEAD.removeChild(script);
-				check(key, script.src);
 				script = null;
-				
+				doly.check();
 			}
 		};
         script.src = url;
@@ -244,39 +299,13 @@
         HEAD.insertBefore(link, HEAD.firstChild);
 	}
 	
-	function check(id, src) {
-	    var i = 0,
-		    j = loadings.length,
-		    OK = STATUS.complete,
-		    key, deps, args, factory, len, mod;
-		loop:
-		for ( ; j--; ) {
-			key = loadings[j];
-			mod = modules[key];
-			args = mod.args;
-			len = args.length;
-			factory = mod.factory;
-			for (i = 0; i < len; i++) {
-			    if (id && key == id) {
-				    if (args[i] == src) {
-					    
-					}
-				}
-				if (modules[args[i]].status != OK) {
-				    continue loop;
-				}
-			}
-			
-			if (mod.status != OK) {
-				loadings.splice(j, 1);
-				install(key, args, factory);
-				check();
-			}
-		}
+	var rfindr = / /mgi;
+	function getFactoryRequire(factory) {
+	    
 	}
 	
 	mix(doly, {
-	    
+		
 		require: function(list, factory, name) {
 		    var len = arguments.length,
 			    base = _config.baseUrl,
@@ -295,7 +324,7 @@
 				factory = list;
 				list = [];
 			}
-			key = (name && module.parse(name, base)[0]) || 'd_o_l_y' + (__id ++).toString(32);
+			// factory 中的require
 			for (modLen = list.length; i < modLen; i++) {
 				ary = module.parse(list[i], base);
 				url = ary[0];
@@ -305,7 +334,7 @@
 				if (ext == 'js') {
 					tn++;
 					if (!mod) {
-						loadJS(url, key);
+						loadJS(url);
 					} else if (mod.status == OK) {
 					    dn++;
 					}
@@ -317,13 +346,46 @@
 					loadCSS(url);
 				}
 			}
-			
+			key = name || 'd_o_l_y' + Date.now().toString(32);
 			if (dn == tn) {
 			    return install(key, args, factory);
 			}
 			module.update(key, START, factory, args, deps);
 			loadings.unshift(key);
-			check();
+			doly.check();
+		},
+		
+		check: function() {
+		    var i = 0,
+				j = loadings.length,
+				OK = STATUS.complete,
+				key, deps, args, factory, len, mod;
+			loop:
+			for ( ; j--; ) {
+				key = loadings[j];
+				mod = modules[key];
+				args = mod.args;
+				len = args.length;
+				factory = mod.factory;
+				for (i = 0; i < len; i++) {
+					if (modules[args[i]].status != OK) {
+						continue loop;
+					}
+				}
+				if (mod.status != OK) {
+					loadings.splice(j, 1);
+					install(key, args, factory);
+					doly.check();
+				}
+			}
+		},
+		
+		checkFail: function(doc, url, error) {
+		    doc && (doc.ok = 1);
+			if (error || !modules[url].state) {
+				//$.log( (error || modules[ id ].state )+"   "+id, 3);
+				//this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
+			}
 		}
 		
 	});
@@ -344,7 +406,7 @@
 		mod.status = STATUS.complete;
 		
 		if (factory) {
-		    ret = factory.apply(window, args);
+			ret = factory.apply(window, args);
 		}
 		if (ret != void 0) {
 		    mod.exports = ret;
@@ -354,12 +416,11 @@
 	
 	/*
 	 * 定义模块的方法
-	 * @param {String} 模块名
-	 * @param {String / Array} 依赖模块列表，单个可以用字符串形式传参，多个用数组形式传参
-	 * @param {Function} 模块的内容
-	 * factory的参数对应依赖模块的外部接口(exports)
+	 * @param {String} name 模块名
+	 * @param {String / Array} deps 依赖模块列表
+	 * @param {Function} factory 模块的内容
 	 */
-	innerDefine = function(name, deps, factory) {
+	window.define = doly.define = function(name, deps, factory) {
 		if (typeof name != 'string') {
 		    factory = deps;
 			deps = name;
@@ -373,9 +434,13 @@
 		if (deps) {
 		    deps = typeof deps == 'string' ? [deps] : deps;
 		}
+		if (!type(factory, 'Function')) {
+		    factory = function() {
+				return factory;
+			};
+		}
 		doly.require(deps, factory, name);
 	};
-	window.define = doly.define = innerDefine;
 	window.doly = doly;
 	
 }(window, document);

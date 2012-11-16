@@ -5,6 +5,6 @@
 define(function() {
     console.log('test_define1:::::');
 	return {
-	    log: 'test_define1 done'
+	    output: 'test_define1 done'
 	};
 });
