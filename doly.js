@@ -11,6 +11,7 @@
 	_$_              = window._$,
 	HTML            = document.documentElement,
 	HEAD            = document.head || document.getElementsByTagName('head')[0],
+	push            = Ap.push,
 	slice           = Ap.slice,
 	toStr           = Op.toString,
 	version         = '0.0.1',
@@ -20,6 +21,7 @@
 	rReadyState     = /loaded|complete|undefined/i,
 	baseElement     = HEAD.getElementsByTagName('base')[0],
 	hasOwnProperty  = Op.hasOwnProperty,
+	all = 'lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
 	
 	doly = function(obj) {
 	    if (obj instanceof doly) return obj; // 本身就是doly实例化对象
@@ -67,10 +69,15 @@
 	 * @return {String|Boolean}
 	 */
 	type = function(arg, str) {
-	    var result;
-		result = toStr.call(arg).slice(8, -1);
+	    var result = toStr.call(arg).slice(8, -1);
 		if (str) return str == result;
 		return result;
+	},
+	
+	// 链式调用
+	result = function(obj) {
+	    // return this._chain ? doly(obj).chain() : obj;
+		return doly(obj);
 	};
 	
 	window._$ = window.doly = doly;
@@ -80,8 +87,11 @@
 		type: type,
 		HTML: HTML,
 		HEAD: HEAD,
+		rword: /[^, ]+/g,
 		modules: modules,
 		VERSION: version,
+		noop: function() {},
+		
 		/*
 		 * 将多个对象合并成一个新对象，后面的对象属性将覆盖前面的
 		 * @param {Object} 一个或多个对象
@@ -147,6 +157,27 @@
 			else {
 			    console[type](args.join(' '));
 			}
+		},
+		
+		// 给doly对象添加自定义方法（包括prototype）
+		mixin: function(obj) {
+		    var func, key;
+			for (key in obj) {
+			    func = obj[key];
+				if (hasOwnProperty(obj, key) && type(func, 'Function')) {
+				    doly[key] = func;
+					doly.prototype[key] = function() {
+					    var args = [this._wrapped];
+						push.apply(args, arguments);
+						return result.call(this, func.apply(doly, args));
+					};
+				}
+			}
+		},
+		
+		// 链式调用
+		chain: function(obj) {
+		    return doly(obj).chain();
 		}
 
 	});
@@ -469,5 +500,22 @@
 		}
 		doly.require(deps, factory, name);
 	};
+	
+	all.replace(doly.rword, function(name) {
+        doly.config.alias['_$' + name] = doly.config['baseUrl'] + name + '.js';
+    });
+	doly.mixin(doly);
+	doly.mix(doly.prototype, {
+	    
+		chain: function() {
+		    this._chain = true;
+            return this;
+		},
+		
+		value: function() {
+		    return this._wrapped;
+		}
+		
+	});
 	
 }(window, document);
