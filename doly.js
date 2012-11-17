@@ -110,7 +110,7 @@
 		 * @param {Object|String} ops 配置对象
 		 */
 		config: function(ops) {
-		    if (typeof ops == 'string' && hasOwnProperty(_config, ops)) {
+		    if (typeof ops == 'string' && hasOwnProperty.call(_config, ops)) {
 			    return _config[ops];
 			}
 			var charset = ops.charset,
@@ -121,7 +121,7 @@
 			}
 			if (alias && type(alias, 'Object')) {
 				if (alias != _config.alias) {
-				    for (key in alias && hasOwnProperty(alias, key)) {
+				    for (key in alias && hasOwnProperty.call(alias, key)) {
 					    if (_config.alias[key]) throw key + '在alias中重复'
 						_config.alias[key] = alias[key];
 					}
@@ -159,18 +159,20 @@
 			}
 		},
 		
-		// 给doly对象添加自定义方法（包括prototype）
+		// 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
 		mixin: function(obj) {
 		    var func, key;
 			for (key in obj) {
 			    func = obj[key];
-				if (hasOwnProperty(obj, key) && type(func, 'Function')) {
-				    doly[key] = func;
-					doly.prototype[key] = function() {
-					    var args = [this._wrapped];
-						push.apply(args, arguments);
-						return result.call(this, func.apply(doly, args));
-					};
+				if (hasOwnProperty.call(obj, key)) {
+					doly[key] = func;
+					if (type(func, 'Function')) {
+						doly.prototype[key] = function() {
+							var args = [this._wrapped];
+							push.apply(args, arguments);
+							return result.call(this, func.apply(doly, args));
+						};
+					}
 				}
 			}
 		},

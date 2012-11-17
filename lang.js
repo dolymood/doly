@@ -20,8 +20,6 @@ define('lang', function() {
 		};
 	});
 	
-	
-	
-	doly.mix(doly, lang);
+	doly.mixin(doly, lang);
 	return lang;
 });
