@@ -8,17 +8,24 @@
 	var
 	Ap              = Array.prototype,
 	Op              = Object.prototype,
-	doly            = {},
+	_$_              = window._$,
 	HTML            = document.documentElement,
 	HEAD            = document.head || document.getElementsByTagName('head')[0],
 	slice           = Ap.slice,
 	toStr           = Op.toString,
+	version         = '0.0.1',
 	rmakeid         = /(#.+|\W)/g,
 	modules         = {}, // 模块加载器的缓存对象
 	loadings        = [], // 加载中的模块
 	rReadyState     = /loaded|complete|undefined/i,
 	baseElement     = HEAD.getElementsByTagName('base')[0],
 	hasOwnProperty  = Op.hasOwnProperty,
+	
+	doly = function(obj) {
+	    if (obj instanceof doly) return obj; // 本身就是doly实例化对象
+		if (!(this instanceof doly)) return new doly(obj);
+		this._wrapped = obj;
+	},
 	
 	STATUS = {
         uninitialized : 0,
@@ -66,13 +73,15 @@
 		return result;
 	};
 	
+	window._$ = window.doly = doly;
+	
 	mix(doly, {
 	    mix: mix,
 		type: type,
 		HTML: HTML,
 		HEAD: HEAD,
 		modules: modules,
-		
+		VERSION: version,
 		/*
 		 * 将多个对象合并成一个新对象，后面的对象属性将覆盖前面的
 		 * @param {Object} 一个或多个对象
@@ -87,20 +96,29 @@
 		},
 		
 		/*
-		 * 修改模块加载器的配置
-		 * @param {Object} ops 配置对象(charset || baseUrl)
+		 * 获得或者修改模块加载器的配置
+		 * @param {Object|String} ops 配置对象
 		 */
 		config: function(ops) {
-		    var charset = ops.charset,
-			    alias = ops.alias;
+		    if (typeof ops == 'string' && hasOwnProperty(_config, ops)) {
+			    return _config[ops];
+			}
+			var charset = ops.charset,
+			    alias = ops.alias, key;
 			if (ops.baseUrl) _config.baseUrl = parseUrl(ops.baseUrl, _config.baseUrl);
 			if (charset && type(charset, 'Object')) {
-				_config.charset = doly.merge(_config.charset, charset);
+				doly.mix(_config.charset, charset);
 			}
 			if (alias && type(alias, 'Object')) {
-				_config.alias = doly.merge(_config.alias, alias);
+				if (alias != _config.alias) {
+				    for (key in alias && hasOwnProperty(alias, key)) {
+					    if (_config.alias[key]) throw key + '在alias中重复'
+						_config.alias[key] = alias[key];
+					}
+				}
 			}
 		},
+		
 		// sea.js todo
 		log: function() {
 		    if (typeof console === 'undefined') return;
@@ -157,11 +175,11 @@
 		} else {
 			tmp = url.charAt(0);
 			st = url.slice(0, 2);
-			if (tmp !== '.' && tmp != '/') { //相对于根路径
+			if (tmp !== '.' && tmp != '/') { // 相对于根路径
 				modUrl = base + url;
-			} else if (st == './') { //相对于兄弟路径
+			} else if (st == './') { // 相对于兄弟路径
 				modUrl = (base[base.length - 1] == '/' ? base : (base + '/')) + url.substr(2);
-			} else if (st == '..') { //相对于父路径
+			} else if (st == '..') { // 相对于父路径
 				arr = base.replace(/\/$/, '').split('/');
 				tmp = url.replace(/\.\.\//g, function() {
 					arr.pop();
@@ -315,11 +333,6 @@
         HEAD.insertBefore(link, HEAD.firstChild);
 	}
 	
-	var rfindr = / /mgi;
-	function getFactoryRequire(factory) {
-	    
-	}
-	
 	mix(doly, {
 		
 		require: function(list, factory, nameUrl) {
@@ -397,9 +410,9 @@
 		
 		checkFail: function(doc, url, error) {
 		    doc && (doc.ok = 1);
-			if (error || !modules[url].state) {
-				doly.log((error || modules[url].state) + "   " + url);
-				doly.log('Failed to load [[ ' + url + ' ]]' + modules[url].state);
+			if (error || !modules[url].status) {
+				doly.log((error || modules[url].status) + "   " + url);
+				doly.log('Failed to load [[ ' + url + ' ]]' + modules[url].status);
 			}
 		}
 		
@@ -456,6 +469,5 @@
 		}
 		doly.require(deps, factory, name);
 	};
-	window.doly = doly;
 	
 }(window, document);
