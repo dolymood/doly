@@ -23,6 +23,18 @@
 	hasOwnProperty  = Op.hasOwnProperty,
 	all = 'lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
 	
+	class2type = {
+	    'NaN'                     : 'NaN',
+		'null'                    : 'Null',
+		'undefined'               : 'Undefined',
+		'[object global]'         : 'Window',
+		'[object DOMWindow]'      : 'Window',
+		'[object HTMLDocument]'   : 'Document',
+        '[object HTMLCollection]' : 'NodeList',
+        '[object StaticNodeList]' : 'NodeList',
+        '[object IXMLDOMNodeList]': 'NodeList'
+	},
+	
 	doly = function(obj) {
 	    if (obj instanceof doly) return obj; // 本身就是doly实例化对象
 		if (!(this instanceof doly)) return new doly(obj);
@@ -69,7 +81,7 @@
 	 * @return {String|Boolean}
 	 */
 	type = function(arg, str) {
-	    var result = toStr.call(arg).slice(8, -1);
+	    var result = class2type[(obj == null || obj !== obj ) ? obj : toStr.call(arg).slice(8, -1)] || obj.nodeName;
 		if (str) return str == result;
 		return result;
 	},
@@ -91,6 +103,10 @@
 		modules: modules,
 		VERSION: version,
 		noop: function() {},
+		
+		has: function(obj, key) {
+		    return hasOwnProperty.call(obj, key);
+		},
 		
 		/*
 		 * 将多个对象合并成一个新对象，后面的对象属性将覆盖前面的
@@ -131,7 +147,7 @@
 		
 		// sea.js todo
 		log: function() {
-		    if (typeof console === 'undefined') return;
+		    if (typeof console === void 0) return;
 
 			var args = Array.apply([], arguments);
 
@@ -502,7 +518,9 @@
 		}
 		doly.require(deps, factory, name);
 	};
-	
+	'Boolean,Number,String,Function,Array,Date,RegExp,Object'.replace(doly.rword, function(name) {
+	    class2type['[object ' + name + ']'] = name;
+	});
 	all.replace(doly.rword, function(name) {
         doly.config.alias['_$' + name] = doly.config['baseUrl'] + name + '.js';
     });
