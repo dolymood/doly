@@ -163,14 +163,11 @@
             var length = args.length;
             if (length === 1) {
                 console[type](args[0]);
-            }
-            else if (length === 2) {
+            } else if (length === 2) {
                 console[type](args[0], args[1]);
-            }
-            else if (length === 3) {
+            } else if (length === 3) {
                 console[type](args[0], args[1], args[2]);
-            }
-            else {
+            } else {
                 console[type](args.join(' '));
             }
         },
