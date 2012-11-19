@@ -88,8 +88,7 @@
     
     // 链式调用
     result = function(obj) {
-        // return this._chain ? doly(obj).chain() : obj;
-        return doly(obj);
+        return this._chain ? doly(obj).chain() : obj;
     };
     
     window._$ = window.doly = doly;
@@ -177,15 +176,18 @@
         mixin: function(obj) {
             var func, key;
             for (key in obj) {
-                func = obj[key];
-                if (doly.has(obj, key)) {
+				if (doly.has(obj, key)) {
+				    func = obj[key];
                     doly[key] = func;
                     if (type(func, 'Function')) {
-                        doly.prototype[key] = function() {
-                            var args = [this._wrapped];
-                            push.apply(args, arguments);
-                            return result.call(this, func.apply(doly, args));
-                        };
+                        (function(func, key) {
+						    doly.prototype[key] = function() {
+								var args = [this._wrapped];
+								push.apply(args, arguments);
+								return result.call(this, func.apply(doly, args));
+							};
+						})(func, key);
+						
                     }
                 }
             }
@@ -496,22 +498,21 @@
      * @param {Function} factory 模块的内容
      */
     window.define = doly.define = function(name, deps, factory) {
-        if (typeof name != 'string') {
-            factory = deps;
-            deps = name;
-            name = null;
-        }
-        if (type(deps, 'Function')) {
-            factory = deps;
-            deps = [];
-        }
+        var fac;
+		if (arguments.length == 2) {
+		    factory = deps;
+			deps = [];
+		}
         // 有依赖包
         if (deps) {
             deps = typeof deps == 'string' ? [deps] : deps;
-        }
-        if (!type(factory, 'Function')) {
+        } else {
+		    deps = [];
+		}
+		fac = factory;
+        if (!type(fac, 'Function')) {
             factory = function() {
-                return factory;
+                return fac;
             };
         }
         doly.require(deps, factory, name);

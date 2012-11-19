@@ -2,13 +2,12 @@
  * lang
  */
 
-define('lang', Array.isArray ? null : 'lang_fix', function() {
+define('lang', Array.isArray ? [] : ['lang_fix'], function() {
     'use strict';
     
     var Op             = Object.prototype,
         Ap             = Array.prototype,
         lang           = {},
-        type           = doly.type,
         rword          = doly.rword,
         slice          = Ap.slice,
         breaker        = {},
@@ -16,8 +15,7 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         hasOwnProperty = Op.hasOwnProperty,
         // 链式调用
         result = function(obj) {
-            // return this._chain ? doly(obj).chain() : obj;
-            return doly(obj);
+            return this._chain ? doly(obj).chain() : obj;
         },
 		// JSON reg
 		rvalidchars = /^[\],:{}\s]*$/,
@@ -25,12 +23,12 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
 		rvalidescape = /\\(?:["\\\/bfnrt]|u[\da-fA-F]{4})/g,
 		rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
     
-    ['Array', 'Function', 'Object', 'RegExp'].forEach(function(type) {
+    ['Function', 'Object', 'RegExp'].forEach(function(type) {
         lang['is' + type] = function(obj) {
             return obj && toString.call(obj) === '[object ' + type + ']';
         };
     });
-
+    
     ['Boolean', 'Number', 'String'].forEach(function(type) {
         lang['is' + type] = function(obj) {
             return typeof obj === type.toLowerCase();
@@ -140,7 +138,7 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
     };
     
     lang.isArrayLike = function(obj, str) {
-        var type = type(obj), len;
+        var type = doly.type(obj), len;
         if (type === 'Array' || type === 'NodeList' || type === 'Arguments' || str && type === 'String') {
             return true;
         }
@@ -151,9 +149,11 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         return false;
     };
     
-    lang.isObject = function(obj) {
+    lang.isObjectLike = function(obj) {
         return obj === Object(obj);
     };
+	
+	lang.isArray = Array.isArray;
     
     lang.isWindow = function(obj) {
         return obj && obj == obj.window;
@@ -225,7 +225,7 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         }
     };
     
-    doly.mixin(doly, lang);
+    doly.mixin(lang);
     
     // 改变的原数组
     'pop,push,reverse,shift,sort,splice,unshift'.replace(rword, function(name) {
