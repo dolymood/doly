@@ -80,8 +80,8 @@
      * @param {String} str 可选，要比较的类型
      * @return {String|Boolean}
      */
-    type = function(arg, str) {
-        var result = class2type[(obj == null || obj !== obj ) ? obj : toStr.call(arg).slice(8, -1)] || obj.nodeName;
+    type = function(obj, str) {
+        var result = class2type[(obj == null || obj !== obj ) ? obj : toStr.call(obj)] || obj.nodeName;
         if (str) return str == result;
         return result;
     },
@@ -126,7 +126,7 @@
          * @param {Object|String} ops 配置对象
          */
         config: function(ops) {
-            if (typeof ops == 'string' && hasOwnProperty.call(_config, ops)) {
+            if (typeof ops == 'string' && doly.has(_config, ops)) {
                 return _config[ops];
             }
             var charset = ops.charset,
@@ -137,8 +137,9 @@
             }
             if (alias && type(alias, 'Object')) {
                 if (alias != _config.alias) {
-                    for (key in alias && hasOwnProperty.call(alias, key)) {
-                        if (_config.alias[key]) throw key + '在alias中重复'
+                    for (key in alias) {
+                        if (!doly.has(alias, key)) continue;
+						if (_config.alias[key]) throw key + '在alias中重复'
                         _config.alias[key] = alias[key];
                     }
                 }
@@ -177,7 +178,7 @@
             var func, key;
             for (key in obj) {
                 func = obj[key];
-                if (hasOwnProperty.call(obj, key)) {
+                if (doly.has(obj, key)) {
                     doly[key] = func;
                     if (type(func, 'Function')) {
                         doly.prototype[key] = function() {
@@ -519,7 +520,7 @@
         class2type['[object ' + name + ']'] = name;
     });
     all.replace(doly.rword, function(name) {
-        doly.config.alias['_$' + name] = doly.config['baseUrl'] + name + '.js';
+        _config.alias['$' + name] = _config.baseUrl + name + '.js';
     });
     doly.mixin(doly);
     doly.mix(doly.prototype, {
