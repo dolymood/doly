@@ -18,7 +18,12 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         result = function(obj) {
             // return this._chain ? doly(obj).chain() : obj;
             return doly(obj);
-        };
+        },
+		// JSON reg
+		rvalidchars = /^[\],:{}\s]*$/,
+		rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+		rvalidescape = /\\(?:["\\\/bfnrt]|u[\da-fA-F]{4})/g,
+		rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
     
     ['Array', 'Function', 'Object', 'RegExp'].forEach(function(type) {
         lang['is' + type] = function(obj) {
@@ -165,7 +170,7 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         throw new Error(msg);
     };
     
-    lang.makeArray = function(obj) {
+    lang.makeArray = lang.toArray = function(obj) {
         if (obj == null) {
             return [];
         }
@@ -174,20 +179,45 @@ define('lang', Array.isArray ? null : 'lang_fix', function() {
         }
         return doly.values(obj);
     };
-    
-    lang.parseHTML = function() {
-        
+    // jquery
+    lang.parseXML = function(data) {
+        var xml, tmp;
+		if (!data || typeof data !== 'string') {
+			return null;
+		}
+		try {
+			if (window.DOMParser) { // Standard
+				tmp = new DOMParser();
+				xml = tmp.parseFromString(data , 'text/xml');
+			} else { // IE
+				xml = new ActiveXObject('Microsoft.XMLDOM');
+				xml.async = 'false';
+				xml.loadXML(data);
+			}
+		} catch(e) {
+			xml = undefined;
+		}
+		if (!xml || !xml.documentElement || xml.getElementsByTagName('parsererror').length) {
+			doly.error('Invalid XML: ' + data);
+		}
+		return xml;
     };
     
-    lang.parseJSON = function() {
-        
+	lang.parseJSON = function(data) {
+        if (!data || typeof data != 'string') return null;
+		data = data.trim();
+		if (window.JSON && window.JSON.parse) {
+		    return window.JSON.parse(data);
+		} else {
+		    if (rvalidchars.test(data.replace(rvalidescape, '@')
+				.replace(rvalidtokens, ']')
+				.replace(rvalidbraces, ''))) {
+				return (new Function( 'return ' + data))();
+			}
+		}
     };
-    
-    lang.parseXML = function() {
-        
-    };
-    
-    lang.globalEval = function(code) {
+	
+    lang.globalEval = lang.parseJS = function(code) {
         if (code && /\S/.test(code)) {
             (window.execScript || function(code) {
                 window['eval'].call(window, code);
