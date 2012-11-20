@@ -18,6 +18,7 @@
     rReadyState     = /loaded|complete|undefined/i,
     baseElement     = HEAD.getElementsByTagName('base')[0],
     hasOwnProperty  = Op.hasOwnProperty,
+	
     all = 'lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
     
     class2type = {
