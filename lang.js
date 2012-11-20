@@ -9,7 +9,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         Ap             = Array.prototype,
         lang           = {},
         rword          = doly.rword,
-        slice          = Ap.slice,
+        slice          = doly.slice,
         breaker        = {},
         toString       = Op.toString,
         hasOwnProperty = Op.hasOwnProperty,
@@ -177,7 +177,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
             return [];
         }
         if(doly.isArrayLike(obj)) {
-            return slice.call(obj);
+            return slice(obj);
         }
         return [obj];
     };
@@ -186,8 +186,8 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         if (obj == null) {
             return [];
         }
-        if(doly.isArrayLike(obj)) {
-            return slice.call(obj);
+        if(doly.isArrayLike(obj, true)) {
+            return slice(obj);
         }
         return doly.values(obj);
     };
@@ -241,7 +241,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
 	var nativeBind = Function.prototype.bind;
 	lang.bind = function bind(func, context) {
 		if (!doly.isFunction(func)) doly.error('TypeError: Object #<Object> has no method "bind"');
-		if (func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));		
+		if (func.bind === nativeBind) return nativeBind.apply(func, slice(arguments, 1));		
 	};
 	
     doly.mixin(lang);
@@ -256,8 +256,8 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
             return result.call(this, obj);
         };
     });
-    // 返回新的结果
-    'concat,join,slice'.replace(rword, function(name) {
+    // 返回新的结果(去除slice)
+    'concat,join'.replace(rword, function(name) {
         var method = Ap[name];
         doly.prototype[name] = function() {
             return result.call(this, method.apply(this._wrapped, arguments));

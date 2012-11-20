@@ -37,8 +37,8 @@ $(function() {
 			ok(_$({length:2}).chain().makeArray().type().value() === 'Array');
 			ok(_$({length:2}).chain().toArray().type().value() === 'Array');
 			ok(_$(arguments).chain().toArray().type().value() === 'Array');
-			ok(_$('abc').toArray().join(',') === 'a,b,c');
-			ok(_$('abc').toArray()[0] === 'a');
+			equal(_$('abc').toArray().join(','), 'a,b,c');
+			equal(_$('abc').toArray()[0], 'a');
 			ok(_$('abc').makeArray()[0] == 'abc');
 			start();
 		});

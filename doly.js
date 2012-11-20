@@ -6,13 +6,10 @@
     'use strict';
     
     var
-    Ap              = Array.prototype,
     Op              = Object.prototype,
     _$_              = window._$,
     HTML            = document.documentElement,
     HEAD            = document.head || document.getElementsByTagName('head')[0],
-    push            = Ap.push,
-    slice           = Ap.slice,
     toStr           = Op.toString,
     version         = '0.0.1',
     rmakeid         = /(#.+|\W)/g,
@@ -172,6 +169,34 @@
             }
         },
         
+		/*
+         * 数组化
+         * @param {ArrayLike} nodes 要处理的类数组对象
+         * @param {Number} start 可选,起始下标
+         * @param {Number} end  可选,规定从何处结束选取
+         * @return {Array}
+         */
+        slice: function(nodes, start, end) {
+            var ret = [], n = nodes.length, i;
+            if (end === void 0 || typeof end == 'number' && isFinite(end)) {
+                start = parseInt(start, 10) || 0;
+                end = end == void 0 ? n : parseInt(end, 10);
+                if (start < 0) {
+                    start += n;
+                }
+                if (end > n) {
+                    end = n;
+                }
+                if (end < 0) {
+                    end += n;
+                }
+                for (i = start; i < end; i++) {
+                    ret[i - start] = nodes[i];
+                }
+            }
+            return ret;
+        },
+		
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
         mixin: function(obj) {
             var func, key;
@@ -183,11 +208,10 @@
                         (function(func, key) {
 						    doly.prototype[key] = function() {
 								var args = [this._wrapped];
-								push.apply(args, arguments);
+								args.push.apply(args, arguments);
 								return result.call(this, func.apply(doly, args));
 							};
 						})(func, key);
-						
                     }
                 }
             }
@@ -297,15 +321,6 @@
         last = args.length - 1;
         lastFunc = args[last];
         if (typeof lastFunc == "function") {
-            // 用闭包的形式在高级浏览器下是对的，
-			// 但是在IE9一下的浏览器中，是不对的
-			// 可以理解为每一个iframe里面执行代码的时候
-			// 如果扩展内置对象的原型的话，只会在这个iframe
-			// 中有效，在原页面的环境中是没效果的。
-			// args[last] = function() {
-                // doly = Ns;
-                // return lastFunc.apply(parent, arguments);
-            // };
             args[last] =  parent.Function('doly', 'return ' + lastFunc)(Ns);
         }
         Ns.define.apply(module, args);

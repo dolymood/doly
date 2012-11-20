@@ -101,8 +101,8 @@ define('lang_fix', function() {
     // Object
     Object.keys || (Object.keys = function(obj) {
         var keys = [], key;
-        for (key in obj && doly.has(obj, key)) {
-            keys.push(key);
+        for (key in obj) {
+            doly.has(obj, key) && keys.push(key);
         }
         return keys;
     });
@@ -110,7 +110,7 @@ define('lang_fix', function() {
     // String
     Sp.trim || (Sp.trim = function() {
         var rtriml = /^[\s\uFEFF\xA0]+/,
-            rtrimr = /^[\s\uFEFF\xA0]+$/;
+            rtrimr = /[\s\uFEFF\xA0]+$/;
         return this.replace(rtriml, '').replace(rtrimr, '');
     });
     
@@ -130,12 +130,12 @@ define('lang_fix', function() {
     }
 
     // Function
-    var slice = Ap.slice;
+    var slice = doly.slice;
     Fp.bind || (Fp.bind = function(context) {
         if (arguments.length < 2 && context=== void 0) return this;
-        var fn = this, args = slice.call(arguments, 1);
+        var fn = this, args = slice(arguments, 1);
         return function() {
-            return fn.apply(context, args.concat(slice.call(arguments)));
+            return fn.apply(context, args.concat(slice(arguments)));
         };
     });
 
