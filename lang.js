@@ -24,15 +24,9 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
     
     ['Function', 'Object', 'RegExp'].forEach(function(type) {
-        if (type === 'Object') {
-		    lang['isStrict' + type] = function(obj) {
-				return obj && toString.call(obj) === '[object ' + type + ']';
-			};
-		} else {
-		    lang['is' + type] = function(obj) {
-				return obj && toString.call(obj) === '[object ' + type + ']';
-			};
-		}
+        lang['is' + type] = function(obj) {
+            return obj && toString.call(obj) === '[object ' + type + ']';
+        };
     });
     
     ['Boolean', 'Number', 'String'].forEach(function(type) {
@@ -157,7 +151,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         return false;
     };
     
-    lang.isObject = function(obj) {
+    lang.isObjectLike = function(obj) {
         return obj === Object(obj);
     };
     
