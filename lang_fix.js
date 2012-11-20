@@ -11,7 +11,7 @@ define('lang_fix', function() {
         Dp             = Date.prototype;
     
     // Array
-    doly.isArray = Array.isArray || (Array.isArray = function(obj) {
+    Array.isArray || (Array.isArray = function(obj) {
         return doly.type(obj, 'Array');
     });
     Ap.indexOf || (Ap.indexOf = function(item, i) {
@@ -99,7 +99,7 @@ define('lang_fix', function() {
     }
     
     // Object
-    doly.keys = Object.keys || (Object.keys = function(obj) {
+    Object.keys || (Object.keys = function(obj) {
         var keys = [], key;
         for (key in obj && doly.has(obj, key)) {
             keys.push(key);
@@ -108,7 +108,7 @@ define('lang_fix', function() {
     });
     
     // String
-    Sp.trim = || (Sp.trim = function() {
+    Sp.trim || (Sp.trim = function() {
         var rtriml = /^[\s\uFEFF\xA0]+/,
             rtrimr = /^[\s\uFEFF\xA0]+$/;
         return this.replace(rtriml, '').replace(rtrimr, '');

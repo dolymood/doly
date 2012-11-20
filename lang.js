@@ -2,7 +2,7 @@
  * lang
  */
 
-define('lang', Array.isArray ? [] : ['lang_fix'], function() {
+define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
     'use strict';
     
     var Op             = Object.prototype,
@@ -44,6 +44,8 @@ define('lang', Array.isArray ? [] : ['lang_fix'], function() {
         for (key in obj) if (doly.has(obj, key)) values.push(obj[key]);
         return values;
     };
+	
+	lang.keys = Object.keys;
     
     var each = lang.each = lang.forEach = function(obj, callback, context) {
         if (!obj) return;
@@ -170,7 +172,17 @@ define('lang', Array.isArray ? [] : ['lang_fix'], function() {
         throw new Error(msg);
     };
     
-    lang.makeArray = lang.toArray = function(obj) {
+    lang.makeArray = function(obj) {
+        if (obj == null) {
+            return [];
+        }
+        if(doly.isArrayLike(obj)) {
+            return slice.call(obj);
+        }
+        return [obj];
+    };
+	
+	lang.toArray = function(obj) {
         if (obj == null) {
             return [];
         }
@@ -179,6 +191,7 @@ define('lang', Array.isArray ? [] : ['lang_fix'], function() {
         }
         return doly.values(obj);
     };
+	
     // jquery
     lang.parseXML = function(data) {
         var xml, tmp;
@@ -225,6 +238,12 @@ define('lang', Array.isArray ? [] : ['lang_fix'], function() {
         }
     };
     
+	var nativeBind = Function.prototype.bind;
+	lang.bind = function bind(func, context) {
+		if (!doly.isFunction(func)) doly.error('TypeError: Object #<Object> has no method "bind"');
+		if (func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));		
+	};
+	
     doly.mixin(lang);
     
     // 改变的原数组

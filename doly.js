@@ -297,11 +297,16 @@
         last = args.length - 1;
         lastFunc = args[last];
         if (typeof lastFunc == "function") {
-            args[last] = function() {
-                doly = Ns;
-                return lastFunc.apply(parent, arguments);
-            };
-            // args[last] =  parent.Function('doly', 'return ' + args[last])(Ns);
+            // 用闭包的形式在高级浏览器下是对的，
+			// 但是在IE9一下的浏览器中，是不对的
+			// 可以理解为每一个iframe里面执行代码的时候
+			// 如果扩展内置对象的原型的话，只会在这个iframe
+			// 中有效，在原页面的环境中是没效果的。
+			// args[last] = function() {
+                // doly = Ns;
+                // return lastFunc.apply(parent, arguments);
+            // };
+            args[last] =  parent.Function('doly', 'return ' + lastFunc)(Ns);
         }
         Ns.define.apply(module, args);
     }
@@ -517,7 +522,7 @@
         }
         doly.require(deps, factory, name);
     };
-    'Boolean,Number,String,Function,Array,Date,RegExp,Object'.replace(doly.rword, function(name) {
+    'Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Object'.replace(doly.rword, function(name) {
         class2type['[object ' + name + ']'] = name;
     });
     all.replace(doly.rword, function(name) {
