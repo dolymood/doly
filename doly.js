@@ -135,7 +135,7 @@
                 if (alias != _config.alias) {
                     for (key in alias) {
                         if (!doly.has(alias, key)) continue;
-						if (_config.alias[key]) throw key + '在alias中重复'
+                        if (_config.alias[key]) throw key + '在alias中重复'
                         _config.alias[key] = alias[key];
                     }
                 }
@@ -169,7 +169,7 @@
             }
         },
         
-		/*
+        /*
          * 数组化
          * @param {ArrayLike} nodes 要处理的类数组对象
          * @param {Number} start 可选,起始下标
@@ -196,22 +196,22 @@
             }
             return ret;
         },
-		
+        
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
         mixin: function(obj) {
             var func, key;
             for (key in obj) {
-				if (doly.has(obj, key)) {
-				    func = obj[key];
+                if (doly.has(obj, key)) {
+                    func = obj[key];
                     doly[key] = func;
                     if (type(func, 'Function')) {
                         (function(func, key) {
-						    doly.prototype[key] = function() {
-								var args = [this._wrapped];
-								args.push.apply(args, arguments);
-								return result.call(this, func.apply(doly, args));
-							};
-						})(func, key);
+                            doly.prototype[key] = function() {
+                                var args = [this._wrapped];
+                                args.push.apply(args, arguments);
+                                return result.call(this, func.apply(doly, args));
+                            };
+                        })(func, key);
                     }
                 }
             }
@@ -519,17 +519,17 @@
      */
     window.define = doly.define = function(name, deps, factory) {
         var fac;
-		if (arguments.length == 2) {
-		    factory = deps;
-			deps = [];
-		}
+        if (arguments.length == 2) {
+            factory = deps;
+            deps = [];
+        }
         // 有依赖包
         if (deps) {
             deps = typeof deps == 'string' ? [deps] : deps;
         } else {
-		    deps = [];
-		}
-		fac = factory;
+            deps = [];
+        }
+        fac = factory;
         if (!type(fac, 'Function')) {
             factory = function() {
                 return fac;

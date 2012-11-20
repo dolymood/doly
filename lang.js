@@ -17,11 +17,11 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         result = function(obj) {
             return this._chain ? doly(obj).chain() : obj;
         },
-		// JSON reg
-		rvalidchars = /^[\],:{}\s]*$/,
-		rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
-		rvalidescape = /\\(?:["\\\/bfnrt]|u[\da-fA-F]{4})/g,
-		rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
+        // JSON reg
+        rvalidchars = /^[\],:{}\s]*$/,
+        rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+        rvalidescape = /\\(?:["\\\/bfnrt]|u[\da-fA-F]{4})/g,
+        rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
     
     ['Function', 'Object', 'RegExp'].forEach(function(type) {
         lang['is' + type] = function(obj) {
@@ -44,8 +44,8 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         for (key in obj) if (doly.has(obj, key)) values.push(obj[key]);
         return values;
     };
-	
-	lang.keys = Object.keys;
+    
+    lang.keys = Object.keys;
     
     var each = lang.each = lang.forEach = function(obj, callback, context) {
         if (!obj) return;
@@ -154,8 +154,8 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
     lang.isObjectLike = function(obj) {
         return obj === Object(obj);
     };
-	
-	lang.isArray = Array.isArray;
+    
+    lang.isArray = Array.isArray;
     
     lang.isWindow = function(obj) {
         return obj && obj == obj.window;
@@ -181,8 +181,8 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         }
         return [obj];
     };
-	
-	lang.toArray = function(obj) {
+    
+    lang.toArray = function(obj) {
         if (obj == null) {
             return [];
         }
@@ -191,45 +191,45 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         }
         return doly.values(obj);
     };
-	
+    
     // jquery
     lang.parseXML = function(data) {
         var xml, tmp;
-		if (!data || typeof data !== 'string') {
-			return null;
-		}
-		try {
-			if (window.DOMParser) { // Standard
-				tmp = new DOMParser();
-				xml = tmp.parseFromString(data , 'text/xml');
-			} else { // IE
-				xml = new ActiveXObject('Microsoft.XMLDOM');
-				xml.async = 'false';
-				xml.loadXML(data);
-			}
-		} catch(e) {
-			xml = undefined;
-		}
-		if (!xml || !xml.documentElement || xml.getElementsByTagName('parsererror').length) {
-			doly.error('Invalid XML: ' + data);
-		}
-		return xml;
+        if (!data || typeof data !== 'string') {
+            return null;
+        }
+        try {
+            if (window.DOMParser) { // Standard
+                tmp = new DOMParser();
+                xml = tmp.parseFromString(data , 'text/xml');
+            } else { // IE
+                xml = new ActiveXObject('Microsoft.XMLDOM');
+                xml.async = 'false';
+                xml.loadXML(data);
+            }
+        } catch(e) {
+            xml = undefined;
+        }
+        if (!xml || !xml.documentElement || xml.getElementsByTagName('parsererror').length) {
+            doly.error('Invalid XML: ' + data);
+        }
+        return xml;
     };
     
-	lang.parseJSON = function(data) {
+    lang.parseJSON = function(data) {
         if (!data || typeof data != 'string') return null;
-		data = data.trim();
-		if (window.JSON && window.JSON.parse) {
-		    return window.JSON.parse(data);
-		} else {
-		    if (rvalidchars.test(data.replace(rvalidescape, '@')
-				.replace(rvalidtokens, ']')
-				.replace(rvalidbraces, ''))) {
-				return (new Function( 'return ' + data))();
-			}
-		}
+        data = data.trim();
+        if (window.JSON && window.JSON.parse) {
+            return window.JSON.parse(data);
+        } else {
+            if (rvalidchars.test(data.replace(rvalidescape, '@')
+                .replace(rvalidtokens, ']')
+                .replace(rvalidbraces, ''))) {
+                return (new Function( 'return ' + data))();
+            }
+        }
     };
-	
+    
     lang.globalEval = lang.parseJS = function(code) {
         if (code && /\S/.test(code)) {
             (window.execScript || function(code) {
@@ -238,12 +238,12 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         }
     };
     
-	var nativeBind = Function.prototype.bind;
-	lang.bind = function bind(func, context) {
-		if (!doly.isFunction(func)) doly.error('TypeError: Object #<Object> has no method "bind"');
-		if (func.bind === nativeBind) return nativeBind.apply(func, slice(arguments, 1));		
-	};
-	
+    var nativeBind = Function.prototype.bind;
+    lang.bind = function bind(func, context) {
+        if (!doly.isFunction(func)) doly.error('TypeError: Object #<Object> has no method "bind"');
+        if (func.bind === nativeBind) return nativeBind.apply(func, slice(arguments, 1));        
+    };
+    
     doly.mixin(lang);
     
     // 改变的原数组
