@@ -322,7 +322,9 @@
         last = args.length - 1;
         lastFunc = args[last];
         if (typeof lastFunc == "function") {
-            args[last] =  parent.Function('doly', 'return ' + lastFunc)(Ns);
+            // 确保是在parent的上下文中创建的，这样查找Native对象的时候就会
+			// 在parent的上下文中查找
+			args[last] = parent.Function('doly', 'return ' + lastFunc)(Ns);
         }
         Ns.define.apply(module, args);
     }
