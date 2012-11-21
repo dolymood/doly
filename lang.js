@@ -53,12 +53,12 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
             obj.forEach(callback, context);
         } else if (obj.length === +obj.length) {
             for (var i = 0, l = obj.length; i < l; i++) {
-                if (callback.call(context, obj[i], i, obj) === breaker) return;
+                if (callback.call(context, obj[i], i, obj) === false) return;
             }
         } else {
             for (var key in obj) {
                 if (doly.has(obj, key)) {
-                    if (callback.call(context, obj[key], key, obj) === breaker) return;
+                    if (callback.call(context, obj[key], key, obj) === false) return;
                 }
             }
         }
