@@ -199,6 +199,26 @@
             return ret;
         },
         
+		/**
+         * 生成键值统一的对象，用于高速化判定
+         * @param {Array|String} array 如果是字符串，请用","或空格分开
+         * @param {Number} val 可选，默认为1
+         * @return {Object}
+         */
+        oneObject: function(array, val) {
+            if(typeof array == 'string') {
+                array = array.match(doly.rword) || [];
+            }
+            var result = {},
+			    value = val !== void 0 ? val : 1,
+				i = 0,
+				len = array.length;
+            for(; i < len; i++) {
+                result[array[i]] = value;
+            }
+            return result;
+        },
+		
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
         mixin: function(obj) {
             var func, key;
