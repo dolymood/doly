@@ -15,7 +15,7 @@ define('class', ['$lang'], function() {
     };
 	
 	Class.create = function(parent, properties) {
-	    var init;
+	    var C, init;
 		if (!doly.isFunction(parent)) {
 		    properties = parent;
 		}
@@ -24,11 +24,11 @@ define('class', ['$lang'], function() {
 		init = properties.init;
 		delete properties.inherit;
 		delete properties.init;
-		function SubClass() {
-		    parent.apply(this, arguments);
-		}
-		
-		return 
+		C = doly.isFunction(init) ?
+		    init :
+		    function() { (parent.init || parent).apply(this, arguments); };
+		mix(C, doly.mutators).inherit(C, parent, properties);
+		return classify(C);
 	};
     
     function classify(cls) {
@@ -51,38 +51,14 @@ define('class', ['$lang'], function() {
     }
     
     doly.mutators = {
-        inherit : function( parent,init ) {
-            var bridge = function() { }
-            if( typeof parent == "function"){
-                for(var i in parent){//继承类成员
-                    this[i] = parent[i];
-                }
-                bridge.prototype = parent.prototype;
-                this.prototype = new bridge ;//继承原型成员
-                this._super = parent;//指定父类
-            }
-            this._init = (this._init || []).concat();
-            if( init ){
-                this._init.push(init);
-            }
-            this.toString = function(){
-                return (init || bridge) + ""
-            }
-            var proto = this.prototype;
-            proto.setOptions = function(){
-                var first = arguments[0];
-                if( typeof first === "string" ){
-                    first =  this[first] || (this[first] = {});
-                    [].splice.call( arguments, 0, 1, first );
-                }else{
-                    [].unshift.call( arguments,this );
-                }
-                $.Object.merge.apply(null,arguments);
-                return this;
-            }
-            return proto.constructor = this;
+        inherit: function(C, P, properties) {
+            var F = function() {};
+		    F.prototype = P.prototype;
+		    C.prototype = new F;
+		    this._super = parent;
+		   
         },
-        implement:function(){
+        implement: function(){
             var target = this.prototype, reg = rconst;
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
