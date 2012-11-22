@@ -1,7 +1,7 @@
 /**
  * test module
  */
-define('module', ['base'], function(base) {
+define(['base'], function(base) {
 	return {
 	    output: 'deps define(require)'
 	};

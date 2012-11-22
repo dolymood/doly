@@ -11,6 +11,7 @@
     HTML            = document.documentElement,
     HEAD            = document.head || document.getElementsByTagName('head')[0],
     toStr           = Op.toString,
+	__ID__          = 10,
     version         = '0.0.1',
     rmakeid         = /(#.+|\W)/g,
     modules         = {}, // 模块加载器的缓存对象
@@ -447,7 +448,7 @@
                     loadCSS(url);
                 }
             }
-            key = nameUrl || 'd_o_l_y' + Date.now().toString(32);
+            key = nameUrl || 'd_o_l_y' + (++__ID__) + Date.now().toString(32);
             if (dn == tn) {
                 return install(key, args, factory);
             }
