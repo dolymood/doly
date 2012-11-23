@@ -221,15 +221,15 @@
         },
 		
 		getUID: window.getComputedStyle ? function(obj) {
-		    return obj.uidk || (obj.uidk = __UID_++);
+		    return obj.dolyuniqueid || (obj.dolyuniqueid = __UID_++);
 		} : function(obj) {
 		    if (obj.nodeType !== 1) {
-                return obj.uidk || (obj.uidk = __UID_++);
+                return obj.dolyuniqueid || (obj.dolyuniqueid = __UID_++);
             }
-            var uid = obj.getAttribute('uidk');
+            var uid = obj.getAttribute('dolyuniqueid');
             if (!uid) {
                 uid = __UID_++;
-                obj.setAttribute('uidk', uid);
+                obj.setAttribute('dolyuniqueid', uid);
             }
             return +uid;
 		},
