@@ -79,15 +79,15 @@ $(function() {
 			equal(author.walk(), 'author walk');
 			equal(author.show(), 'author`s books are bookname1|bookname2');
 			equal(author.showFirst(), 'author`s first book is bookname1');
-			ok(person instanceof Person);
-			ok(person instanceof Animal);
+			ok(author instanceof Person);
+			ok(author instanceof Animal);
 			
 			start();
 		});
 	});
 	
 	asyncTest('class + require', function() {
-		_$.require(['Author'], function(Author) {
+		_$.require(['Animal', 'Person', 'Author'], function(Animal, Person, Author) {
 		    var author = new Author('author', 50, ['bookname1', 'bookname2']);
 			equal(author.say(), 'author`s age is 50 and his books are bookname1|bookname2');
 			equal(author.run(), 'author run');
@@ -95,6 +95,8 @@ $(function() {
 			equal(author.walk(), 'author walk');
 			equal(author.show(), 'author`s books are bookname1|bookname2');
 			equal(author.showFirst(), 'author`s first book is bookname1');
+			ok(author instanceof Person);
+			ok(author instanceof Animal);
 			start();
 		});
 	});
