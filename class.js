@@ -46,7 +46,7 @@ define('class', ['$lang'], function() {
         cls.implement || (cls.implement = implement);
         return cls;
     }
-    // 给类的prototype动态添加成员
+    // 给类的prototype动态添加成员（不能包含Extends ？）
     function implement(properties) {
         var mutators = doly.mutators,
             proto = this.prototype,
