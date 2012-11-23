@@ -34,7 +34,7 @@ define('class', ['$lang'], function() {
         delete properties.init;
         C = doly.isFunction(init) ?
             init :
-            function() { (P.init || P).apply(this, arguments); };
+            function() { P.apply(this, arguments); };
         inherit(C, P, properties);
         return classify(C);
     };
