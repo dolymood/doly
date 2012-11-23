@@ -37,7 +37,7 @@ define('class', ['$lang'], function() {
             init :
             function() { P.apply(this, arguments); };
         inherit(C, P, properties);
-        return classify(C);
+        return C;
     };
 
     // 为一个普通的函数cls添加两个方法，
