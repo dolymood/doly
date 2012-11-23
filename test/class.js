@@ -1,10 +1,7 @@
 $(function() {
 	module('class');
 	asyncTest('class||factory', function() {
-	    _$.config({
-		    'baseUrl': 'test/js/'
-		});
-		
+
 		_$.require(['$class'], function() {
 		    
 			var Animal = _$.factory();
@@ -84,5 +81,13 @@ $(function() {
 			
 			start();
 		});
+	});
+	
+	asyncTest('class + require', function() {
+	     _$.config({
+		    'baseUrl': 'test/js/'
+		});
+		
+		ok(1);
 	});
 });
