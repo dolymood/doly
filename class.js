@@ -26,6 +26,7 @@ define('class', ['$lang'], function() {
         var C, init;
         if (!doly.isFunction(P)) {
             properties = P;
+			P = null;
         }
         properties || (properties = {});
         P || (P = properties.Extends || Class);
