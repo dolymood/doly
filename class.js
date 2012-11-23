@@ -90,6 +90,7 @@ define('class', ['$lang'], function() {
         }
     };
 
+    doly.classify = classify;
     doly.Class = Class;
     doly.factory = Class.create;
     return Class;
