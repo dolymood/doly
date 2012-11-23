@@ -12,6 +12,7 @@
     HEAD            = document.head || document.getElementsByTagName('head')[0],
     toStr           = Op.toString,
 	__ID__          = 10,
+	__UID_          = 1,
     version         = '0.0.1',
     rmakeid         = /(#.+|\W)/g,
     modules         = {}, // 模块加载器的缓存对象
@@ -218,6 +219,20 @@
             }
             return result;
         },
+		
+		getUID: window.getComputedStyle ? function(obj) {
+		    return obj.uidk || (obj.uidk = __UID_++);
+		} : function(obj) {
+		    if (obj.nodeType !== 1) {
+                return obj.uidk || (obj.uidk = __UID_++);
+            }
+            var uid = obj.getAttribute('uidk');
+            if (!uid) {
+                uid = __UID_++;
+                obj.setAttribute('uidk', uid);
+            }
+            return +uid;
+		},
 		
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
         mixin: function(obj) {

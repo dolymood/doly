@@ -3,6 +3,7 @@
  */
 
 define('data', ['$lang'], function() {
+	'use strict';
 	
 	var cache = {},
 	    rtype = /[^38]/,
