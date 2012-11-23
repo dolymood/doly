@@ -4,10 +4,15 @@
 
 define('data', ['$lang'], function() {
 	
-	var cache = {};
+	var cache = {},
+	    rtype = /[^38]/,
+	    retData;
 	
 	function innerData(elem, name, data) {
-	    
+	    if (!doly.acceptData(elem)) return;
+		
+		var isNode = elem.nodeType
+		
 	}
 	
 	function innerRemoveData(elem, name) {
@@ -26,8 +31,8 @@ define('data', ['$lang'], function() {
 		    return innerRemoveData(elem, name);
 		},
 		
-		acceptData: function() {
-		    
+		acceptData: function(elem) {
+		    return doly.isObjectLike(elem) && rtype.test(elem.nodeType);
 		}
 	};
 	
