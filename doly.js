@@ -222,10 +222,10 @@
         
         // 根据obj对象得到其唯一对应的ID值 用于映射obj和缓存信息
         getUID: window.getComputedStyle ? function(obj) {
-            var uniqueid = doly.uniqueid,
+            var uniqueid = doly.uniqueid;
             return obj[uniqueid] || (obj[uniqueid] = __UID_++);
         } : function(obj) {
-            var uniqueid = doly.uniqueid,
+            var uniqueid = doly.uniqueid;
             if (obj.nodeType !== 1) {
                 return obj[uniqueid] || (obj[uniqueid] = __UID_++);
             }
