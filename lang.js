@@ -1,5 +1,5 @@
 /**
- * lang
+ * module lang
  */
 
 define('lang', Array.isArray ? [] : ['$lang_fix'], function() {

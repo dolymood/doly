@@ -1,5 +1,5 @@
 /**
- * lang_fix
+ * module lang_fix
  */
 
 define('lang_fix', function() {

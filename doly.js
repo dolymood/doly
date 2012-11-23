@@ -1,5 +1,5 @@
 /**
- * doly基础库
+ * module doly core
  */
 
 + function(window, document, undefined) {
