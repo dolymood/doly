@@ -74,6 +74,7 @@ define('class', ['$lang'], function() {
         C.prototype.constructor = C;//修整constructor
         mix(C, P);//复制父类的静态成员(此时包含了_super)
         C._super = P.prototype;//重新指定_super方便调用
+		C._superClass = P;
         implement.call(C, properties);
     }
 
