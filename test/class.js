@@ -17,7 +17,7 @@ $(function() {
 			});
 			People.implement({
 			    walk: function() {
-				    return this.name + 'walk';
+				    return this.name + ' walk';
 				}
 			});
 			var Person = Animal.extend({
@@ -27,12 +27,12 @@ $(function() {
 				},
 				
 				say: function() {
-				    return this.name + '`s age is' + this.age;
+				    return this.name + '`s age is ' + this.age;
 				}
 			});
 			Person.implement({
 			    run: function() {
-				    return this.name + 'run';
+				    return this.name + ' run';
 				}
 			});
 			
@@ -45,13 +45,16 @@ $(function() {
 				},
 				
 				show: function() {
-				    return this.name + '`s books are' + this.booknames.join('|');
-				}
+				    return this.name + '`s books are ' + this.booknames.join('|');
+				},
 				
+				say: function() {
+				    return Author._super.say.apply(this) + ' and his books are ' + this.booknames.join('|');
+				}
 			});
 			Author.implement({
 			    showFirst: function() {
-				    return this.name + '`s first book is' + this.booknames[0];
+				    return this.name + '`s first book is ' + this.booknames[0];
 				}
 			});
 			
@@ -61,21 +64,21 @@ $(function() {
 			
 			var people = new People('people');
 			equal(people.sayName(), 'people');
-			equal(people.walk(), 'peoplewalk');
+			equal(people.walk(), 'people walk');
 			ok(people instanceof Animal);
 			
 			var person = new Person('person', 20);
-			equal(person.say(), 'people`s age is 20');
-			equal(person.run(), 'personrun');
+			equal(person.say(), 'person`s age is 20');
+			equal(person.run(), 'person run');
 			ok(person instanceof Animal);
 			
 			var author = new Author('author', 50, ['bookname1', 'bookname2']);
-			equal(author.say(), 'author`s age is 50');
-			equal(author.run(), 'authorrun');
+			equal(author.say(), 'author`s age is 50 and his books are bookname1|bookname2');
+			equal(author.run(), 'author run');
 			equal(author.sayName(), 'author');
-			equal(author.walk(), 'authorwalk');
+			equal(author.walk(), 'author walk');
 			equal(author.show(), 'author`s books are bookname1|bookname2');
-			equal(author.walk(), 'author`s first book is bookname1');
+			equal(author.showFirst(), 'author`s first book is bookname1');
 			ok(person instanceof Person);
 			ok(person instanceof Animal);
 			
@@ -84,10 +87,15 @@ $(function() {
 	});
 	
 	asyncTest('class + require', function() {
-	     _$.config({
-		    'baseUrl': 'test/js/'
+		_$.require(['Author'], function(Author) {
+		    var author = new Author('author', 50, ['bookname1', 'bookname2']);
+			equal(author.say(), 'author`s age is 50 and his books are bookname1|bookname2');
+			equal(author.run(), 'author run');
+			equal(author.sayName(), 'author');
+			equal(author.walk(), 'author walk');
+			equal(author.show(), 'author`s books are bookname1|bookname2');
+			equal(author.showFirst(), 'author`s first book is bookname1');
+			start();
 		});
-		
-		ok(1);
 	});
 });
