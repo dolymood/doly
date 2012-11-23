@@ -6,11 +6,12 @@ define('class', ['$lang'], function() {
     'use strict';
     
     var
-    mix = doly.mix,
-    isArray = Array.isArray,
-    F = function() {},
+    F        = function() {},
+	mix      = doly.mix,
+    isArray  = Array.isArray,
+	unextend = doly.oneObject(['_super', '_superClass', 'extend', 'implement', 'prototype']),
 
-    Class = function(o) {
+    Class    = function(o) {
         if (!(this instanceof Class) && isFunction(o)) {
             return classify(o);
         }
@@ -37,7 +38,7 @@ define('class', ['$lang'], function() {
             init :
             function() { P.apply(this, arguments); };
         inherit(C, P, properties);
-        return C;
+        return classify(C);
     };
 
     // 为一个普通的函数cls添加两个方法，
@@ -70,10 +71,16 @@ define('class', ['$lang'], function() {
     }
 
     function inherit(C, P, properties) {
-        F.prototype = P.prototype;
+        var key;
+		F.prototype = P.prototype;
         C.prototype = new F;//添加原型方法
         C.prototype.constructor = C;//修整constructor
-        mix(C, P);//复制父类的静态成员(此时包含了_super)
+        //复制父类的静态成员
+		for (key in P) {
+		    if (doly.has(P, key) && !unextend[key]) {
+			    C[key] = P[key];
+			}
+		}
         C._super = P.prototype;//重新指定_super方便调用
         C._superClass = P;
         implement.call(C, properties);
