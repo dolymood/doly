@@ -7,6 +7,8 @@ define('class', ['$lang'], function() {
     
     var
 	mix = doly.mix,
+	isArray = Array.isArray,
+	F = function() {},
     
     Class = function(o) {
         if (!(this instanceof Class) && isFunction(o)) {
@@ -14,21 +16,26 @@ define('class', ['$lang'], function() {
         }
     };
 	
-	Class.create = function(parent, properties) {
+	// 提供两种方式(继承父类ParentClass)：
+	// Class.create(ParentClass, {...});
+	// Class.create({
+	//     Extends: ParentClass，
+	//     Implements: OthersClass//从其他类（数组或者单个类）中混入属性
+	// });
+	Class.create = function(P, properties) {
 	    var C, init;
-		if (!doly.isFunction(parent)) {
-		    properties = parent;
+		if (!doly.isFunction(P)) {
+		    properties = P;
 		}
 		properties || (properties = {});
-		parent || (parent = properties.Extends || Class);
+		P || (P = properties.Extends || Class);
 		init = properties.init;
-		delete properties.inherit;
+		delete properties.Extends;
 		delete properties.init;
 		C = doly.isFunction(init) ?
 		    init :
-		    function() { (parent.init || parent).apply(this, arguments); };
-		mix(C, doly.mutators);
-		inherit(C, parent, properties);
+		    function() { (P.init || P).apply(this, arguments); };
+		inherit(C, P, properties);
 		return classify(C);
 	};
     
@@ -41,66 +48,44 @@ define('class', ['$lang'], function() {
     }
     // 给类的prototype动态添加成员
     function implement(properties) {
-        var key, value;
+        var mutators = doly.mutators,
+		    proto = this.prototype,
+		    key, value;
 
         for (key in properties) {
             value = properties[key];
-            if (doly.mutators.hasOwnProperty(key)) {
-              doly.mutators[key].call(this, value);
+            if (doly.has(mutators, key)) {
+                mutators[key].call(this, value);
+				delete properties[key];
             } else {
-                this.prototype[key] = value;
+                proto[key] = value;
             }
         }
     }
-    
+    // 创建子类的快捷方式 直接调用extend即可
 	Class.extend = function(properties) {
-		properties || (properties = {});
 		properties.Extends = this;
 		return Class.create(properties);
 	}
 	
 	function inherit(C, P, properties) {
-	    var F = function() {};
 		F.prototype = P.prototype;
-		C.prototype = new F;
-		this._super = P.prototype;
-		mix(C, P);
-		mix(C.prototype, properties);
+		C.prototype = new F;//添加原型方法
+		C.prototype.constructor = C;//修整constructor
+		mix(C, P);//复制父类的静态成员(此时包含了_super)
+		C._super = P.prototype;//重新指定_super方便调用
+		implement.call(C, properties);
 	}
 	
     doly.mutators = {
-        
-		// 继承的父类
-		'Extends': function(parent) {
-			var existed = this.prototype
-			var proto = createProto(parent.prototype)
-
-			// Keep existed properties.
-			mix(proto, existed)
-
-			// Enforce the constructor to be what we expect.
-			proto.constructor = this
-
-			// Set the prototype chain to inherit from `parent`.
-			this.prototype = proto
-
-			// Set a convenience property in case the parent's prototype is
-			// needed later.
-			this.superclass = parent.prototype
-
-			// Add module meta information in sea.js environment.
-			addMeta(proto)
-		},
         // 从items这些类中混入属性
 		'Implements': function(items) {
-			isArray(items) || (items = [items])
-			var proto = this.prototype, item
-
-			while (item = items.shift()) {
-			    mix(proto, item.prototype || item)
-			}
+			var proto = this.prototype;
+			isArray(items) || (items = [items]);
+			items.forEach(function(item, index, ary) {
+			    mix(proto, item.prototype || item);
+			});
 		}
-		
     };
     
     doly.Class = Class;
