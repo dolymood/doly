@@ -74,7 +74,6 @@ define('class', ['$lang'], function() {
         var key;
 		F.prototype = P.prototype;
         C.prototype = new F;//添加原型方法
-        C.prototype.constructor = C;//修整constructor
         //复制父类的静态成员
 		for (key in P) {
 		    if (doly.has(P, key) && !unextend[key]) {
@@ -84,6 +83,7 @@ define('class', ['$lang'], function() {
         C._super = P.prototype;//重新指定_super方便调用
         C._superClass = P;
         implement.call(C, properties);
+		C.prototype.constructor = C;//修整constructor
     }
 
     doly.mutators = {
