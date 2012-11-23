@@ -17,7 +17,7 @@ define('data', ['$lang'], function() {
             cache = isEle ? doly.dolyCache : elem,
             dt = cache['dolyCache_' + id] || (cache['dolyCache_' + id] = {
                 data: {}
-            })
+            }),
             dtclone = dt;
         // 解析data-*，使得也能通过data得到
         if (isEle && !dt.parsedAttrs){

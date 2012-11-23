@@ -11,8 +11,8 @@
     HTML            = document.documentElement,
     HEAD            = document.head || document.getElementsByTagName('head')[0],
     toStr           = Op.toString,
-	__ID__          = 10,
-	__UID_          = 1,
+    __ID__          = 10,
+    __UID_          = 1,
     version         = '0.0.1',
     rmakeid         = /(#.+|\W)/g,
     modules         = {}, // 模块加载器的缓存对象
@@ -20,7 +20,7 @@
     rReadyState     = /loaded|complete|undefined/i,
     baseElement     = HEAD.getElementsByTagName('base')[0],
     hasOwnProperty  = Op.hasOwnProperty,
-	
+    
     all = 'lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
     
     class2type = {
@@ -200,7 +200,7 @@
             return ret;
         },
         
-		/**
+        /**
          * 生成键值统一的对象，用于高速化判定
          * @param {Array|String} array 如果是字符串，请用","或空格分开
          * @param {Number} val 可选，默认为1
@@ -211,29 +211,39 @@
                 array = array.match(doly.rword) || [];
             }
             var result = {},
-			    value = val !== void 0 ? val : 1,
-				i = 0,
-				len = array.length;
+                value = val !== void 0 ? val : 1,
+                i = 0,
+                len = array.length;
             for(; i < len; i++) {
                 result[array[i]] = value;
             }
             return result;
         },
-		
-		getUID: window.getComputedStyle ? function(obj) {
-		    return obj.dolyuniqueid || (obj.dolyuniqueid = __UID_++);
-		} : function(obj) {
-		    if (obj.nodeType !== 1) {
-                return obj.dolyuniqueid || (obj.dolyuniqueid = __UID_++);
+        
+        // 根据obj对象得到其唯一对应的ID值 用于映射obj和缓存信息
+        getUID: window.getComputedStyle ? function(obj) {
+            var uniqueid = doly.uniqueid,
+            return obj[uniqueid] || (obj[uniqueid] = __UID_++);
+        } : function(obj) {
+            var uniqueid = doly.uniqueid,
+            if (obj.nodeType !== 1) {
+                return obj[uniqueid] || (obj[uniqueid] = __UID_++);
             }
-            var uid = obj.getAttribute('dolyuniqueid');
+            var uid = obj.getAttribute(uniqueid);
             if (!uid) {
                 uid = __UID_++;
-                obj.setAttribute('dolyuniqueid', uid);
+                obj.setAttribute(uniqueid, uid);
             }
             return +uid;
-		},
-		
+        },
+        
+        // 创建一个唯一的id
+        guid: function(str) {
+            return (str || 'doly_' ) +
+                   (+new Date()) +
+                   (Math.random() + '').slice(-8);
+        },
+        
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
         mixin: function(obj) {
             var func, key;
@@ -260,6 +270,8 @@
         }
 
     });
+    
+    doly.uniqueid = doly.guid();
     
     // 配置baseURl
     (function(scripts) {
@@ -359,8 +371,8 @@
         lastFunc = args[last];
         if (typeof lastFunc == "function") {
             // 确保是在parent的上下文中创建的，这样查找Native对象的时候就会
-			// 在parent的上下文中查找
-			args[last] = parent.Function('doly', 'return ' + lastFunc)(Ns);
+            // 在parent的上下文中查找
+            args[last] = parent.Function('doly', 'return ' + lastFunc)(Ns);
         }
         Ns.define.apply(module, args);
     }
