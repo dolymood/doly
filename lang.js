@@ -192,16 +192,16 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         return doly.values(obj);
     };
     
-	// 转换为驼峰式
-	lang.camelCase = function(target) {
-	    if (target.indexOf('-') < 0 && target.indexOf('_') < 0) {
-			return target;
-		}
-		return target.replace(/[-_][^-_]/g, function (match) {
-			return match.charAt(1).toUpperCase();
-		});
-	};
-	
+    // 转换为驼峰式
+    lang.camelCase = function(target) {
+        if (target.indexOf('-') < 0 && target.indexOf('_') < 0) {
+            return target;
+        }
+        return target.replace(/[-_][^-_]/g, function (match) {
+            return match.charAt(1).toUpperCase();
+        });
+    };
+    
     // jquery
     lang.parseXML = function(data) {
         var xml, tmp;
