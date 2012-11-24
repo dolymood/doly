@@ -2,7 +2,7 @@
  * module node
  */
 
-define('node', ['$support', '$data', '$query', '$data'], function(support) {
+define('node', ['$support', '$data', '$query'], function(support) {
     'use strict';
 	
 	
