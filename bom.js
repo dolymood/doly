@@ -5,7 +5,7 @@
 define('bom', function() {
     'use strict';
     
-    var bom = {
+    var bom = doly.bom = {
         // cookie操作
         cookie: {
             get: function(name) {
@@ -293,7 +293,5 @@ define('bom', function() {
             return ret;
         }
     };
-    
-    doly.mix(doly, bom);
     return bom;
 });
