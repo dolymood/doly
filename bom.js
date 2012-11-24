@@ -19,18 +19,18 @@ define('bom', function() {
             set: function(name, value, expires, path, domain, secure) {
                 var cookieText = encodeURIComponent(name) + '=' +
                                  encodeURIComponent(value),
-				    tp = doly.type(expires);
+                    tp = doly.type(expires);
                 if (tp == 'Date') {
                     cookieText += '; expires=' + expires.toGMTString();
                 } else if (expires == 'never') {
-				    expires = new Date();
-					expires.setTime(expires.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
-					cookieText += '; expires=' + expires.toGMTString();
-				} else if (tp == 'Number') {
-				    var exp = new Date();
+                    expires = new Date();
+                    expires.setTime(expires.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
+                    cookieText += '; expires=' + expires.toGMTString();
+                } else if (tp == 'Number') {
+                    var exp = new Date();
                     exp.setTime(exp.getTime() + expires * 60 * 1000);
-					cookieText += '; expires=' + exp.toGMTString();
-				}
+                    cookieText += '; expires=' + exp.toGMTString();
+                }
                 if (path) {
                     cookieText += '; path=' + path;
                 }
