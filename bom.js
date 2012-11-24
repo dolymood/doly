@@ -18,14 +18,15 @@ define('bom', function() {
             
             set: function(name, value, expires, path, domain, secure) {
                 var cookieText = encodeURIComponent(name) + '=' +
-                                 encodeURIComponent(value);
-                if (doly.type(expires, 'Date')) {
+                                 encodeURIComponent(value),
+				    tp = doly.type(expires);
+                if (tp == 'Date') {
                     cookieText += '; expires=' + expires.toGMTString();
                 } else if (expires == 'never') {
 				    expires = new Date();
 					expires.setTime(expires.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
 					cookieText += '; expires=' + expires.toGMTString();
-				} else if (doly.type(expires, 'Number')) {
+				} else if (tp == 'Number') {
 				    var exp = new Date();
                     exp.setTime(exp.getTime() + expires * 60 * 1000);
 					cookieText += '; expires=' + exp.toGMTString();
@@ -48,10 +49,9 @@ define('bom', function() {
         },
         
         // 浏览器信息
-        client: function() {
-            var self = arguments.callee;
-            if (self._info) {
-                return self._info;
+        client: function client() {
+            if (client._info) {
+                return client._info;
             }
             //rendering engines
             var engine = {            
@@ -289,7 +289,7 @@ define('bom', function() {
                 system:     system,
                 name:       name                
             };
-            self._info = ret;
+            client._info = ret;
             return ret;
         }
     };
