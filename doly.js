@@ -270,7 +270,6 @@
         }
 
     });
-    
     doly.uniqueid = doly.guid();
     
     // 配置baseURl
