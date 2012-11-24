@@ -91,7 +91,21 @@ define('bom', function() {
                 //game systems
                 wii: false,
                 ps: false 
-            };    
+            };
+			
+			var name = {
+			    qq: 0,
+				maxthon: 0,
+				sogou: 0,
+				ie: 0,
+				chrome: 0,
+				uc: 0,
+				safari: 0,
+				firefox: 0,
+				opera: 0,
+				
+				unknown: 0
+			};
 
             //detect rendering engines/browsers
             var ua = navigator.userAgent, ret;    
@@ -144,7 +158,6 @@ define('bom', function() {
             //detect browsers
             browser.ie = engine.ie;
             browser.opera = engine.opera;
-            
 
             //detect platform
             var p = navigator.platform;
@@ -216,10 +229,57 @@ define('bom', function() {
             system.wii = ua.indexOf('Wii') > -1;
             system.ps = /playstation/i.test(ua);
             
+			name.opera = browser.opera;
+            name.firefox = browser.firefox;
+			engine.ie ?
+			    ua.indexOf('QQBrowser') != -1 ? name.qq = 1 :
+				ua.indexOf('Maxthon') != -1 ? name.maxthon = 1 :
+				(ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) ? name.sogou = 1 :
+				name.ie = engine.ie :
+			engine.webkit ?
+			    browser.chrome ? name.chrome = browser.chrome :
+				ua.indexOf('QQBrowser') != -1 ? name.qq = 1 :
+				ua.indexOf('UC') != -1 ? name.uc = 1 :
+				ua.indexOf('Maxthon') != -1 ? name.maxthon = 1 :
+				(ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) ? name.sogou = 1 :
+				browser.safari ? name.safari = browser.safari :
+				name.unknown = 1 :
+			'';
+			// if (engine.ie) {
+			    // ua.indexOf('QQBrowser') != -1
+				// if (ua.indexOf('QQBrowser') != -1) {
+					// name.qq = 1;
+				// } else if (ua.indexOf('Maxthon') != -1) {
+					// name.maxthon = 1;
+				// } else if (ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) {
+					// name.sogou = 1;
+				// } else {
+					// name.ie = engine.ie;
+				// }
+			// }
+			// if (engine.webkit) {
+				// if (ua.indexOf('Chrome') != -1) {
+					// name.chrome = 1;
+				// } else if (ua.indexOf('QQBrowser') != -1) {
+					// name.qq = 1;
+				// } else if (ua.indexOf('UC') != -1) {
+					// name.uc = 1;
+				// } else if (ua.indexOf('Maxthon') != -1) {
+					// name.maxthon = 1;
+				// } else if (ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) {
+					// name.sogou = 1;
+				// } else if (ua.indexOf('Version') != -1 && ua.indexOf('Safari') != -1) {
+					// name.safari = 1;
+				// } else {
+					// name.unknown = 1;
+				// }
+			// }
+			
             ret = {
                 engine:     engine,
                 browser:    browser,
-                system:     system        
+                system:     system,
+                name:       name				
             };
             self._info = ret;
             return ret;
