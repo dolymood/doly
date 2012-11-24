@@ -21,7 +21,15 @@ define('bom', function() {
                                  encodeURIComponent(value);
                 if (doly.type(expires, 'Date')) {
                     cookieText += '; expires=' + expires.toGMTString();
-                }
+                } else if (expires == 'never') {
+				    expires = new Date();
+					expires.setTime(expires.getTime() + 100 * 365 * 24 * 60 * 60 * 1000);
+					cookieText += '; expires=' + expires.toGMTString();
+				} else if (doly.type(expires, 'Number')) {
+				    var exp = new Date();
+                    exp.setTime(exp.getTime() + expires * 60 * 1000);
+					cookieText += '; expires=' + exp.toGMTString();
+				}
                 if (path) {
                     cookieText += '; path=' + path;
                 }
