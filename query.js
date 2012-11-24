@@ -4,7 +4,7 @@
 
 define('query', ['$sizzle'], function(Sizzle) {
     'use strict';
-    
+
     var query = {
         
         find: Sizzle,
@@ -13,12 +13,12 @@ define('query', ['$sizzle'], function(Sizzle) {
         unique: Sizzle.uniqueSort,
         matches: Sizzle.matches,
         isXMLDoc: Sizzle.isXML,
-        eleContains: Sizzle.contains
+        eleContains: Sizzle.contains,
         matchesSelector: Sizzle.matchesSelector
         
     };
     
     query.expr[':'] = query.expr.pseudos;
-    doly.mixin(doly, query);
+    doly.mixin(query);
     return query;
 });

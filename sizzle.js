@@ -4,7 +4,8 @@
  * Released under the MIT license
  * http://sizzlejs.com/
  */
-(function( window, undefined ) {
+define('sizzle', function() {
+return (function( window, undefined ) {
 
 var cachedruns,
 	assertGetIdNotName,
@@ -1681,11 +1682,14 @@ Expr.filters = setFilters.prototype = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
 // EXPOSE
-if ( typeof define === "function") {
-	define(function() { return Sizzle; });
-} else {
-	window.Sizzle = Sizzle;
-}
+// if ( typeof define === "function") {
+	// define(function() { return Sizzle; });
+// } else {
+	// window.Sizzle = Sizzle;
+// }
+return Sizzle;
 // EXPOSE
 
 })( window );
+});
+
