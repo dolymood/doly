@@ -55,7 +55,7 @@ define('data', ['$lang'], function() {
         if (!id) {
             return;
         }
-        var clear = true, ret = typeof name == "string",
+        var clear = true, ret = typeof name == 'string',
             cache = elem.nodeType === 1  ? doly.dolyCache : elem,
             dt = cache['dolyCache_' + id],
             dtClone = dt;
