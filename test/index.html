@@ -8,7 +8,19 @@
     <script src="vendor/qunit.js"></script>
     <script src="vendor/jslitmus.js"></script>
     <script src="../doly.js"></script>
-    
+	<script>
+	    _$.require('$ready', function() {
+		    _$.ready(function() {
+			    alert('dom content ready');
+			});
+			_$.ready(function() {
+			    alert('dom content ready1');
+			});
+			_$.ready(function() {
+			    alert('dom content ready2');
+			});
+		});
+	</script>
     <script src="base.js"></script>
     <script src="lang.js"></script>
 	<script src="class.js"></script>
