@@ -7,6 +7,7 @@ define('support', ['$ready'], function() {
 	
 	var div = document.createElement("div"),
 	    support;
+	div.setAttribute('className', 't');
 	
 	support = doly.support = {
 	    
