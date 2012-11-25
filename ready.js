@@ -61,8 +61,8 @@ define('ready', function() {
         if (isReady) func.call(window);
         readyList.push(func);
     }
-    doly.prototype.ready = function(elem, func) {
-        doly.ready(func);
+    doly.prototype.ready = function() {
+		doly.ready(arguments[arguments.length - 1]);
     };
     return doly.ready;
 });
