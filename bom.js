@@ -5,7 +5,7 @@
 define('bom', function() {
     'use strict';
     
-    var bom = doly.bom = {
+    var bom = {
         // cookie操作
         cookie: {
             get: function(name) {
@@ -253,36 +253,6 @@ define('bom', function() {
                 browser.safari ? name.safari = browser.safari :
                 name.unknown = 1 :
             '';
-            // if (engine.ie) {
-                // ua.indexOf('QQBrowser') != -1
-                // if (ua.indexOf('QQBrowser') != -1) {
-                    // name.qq = 1;
-                // } else if (ua.indexOf('Maxthon') != -1) {
-                    // name.maxthon = 1;
-                // } else if (ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) {
-                    // name.sogou = 1;
-                // } else {
-                    // name.ie = engine.ie;
-                // }
-            // }
-            // if (engine.webkit) {
-                // if (ua.indexOf('Chrome') != -1) {
-                    // name.chrome = 1;
-                // } else if (ua.indexOf('QQBrowser') != -1) {
-                    // name.qq = 1;
-                // } else if (ua.indexOf('UC') != -1) {
-                    // name.uc = 1;
-                // } else if (ua.indexOf('Maxthon') != -1) {
-                    // name.maxthon = 1;
-                // } else if (ua.indexOf('SE') != -1 && ua.indexOf('MetaSr') != -1) {
-                    // name.sogou = 1;
-                // } else if (ua.indexOf('Version') != -1 && ua.indexOf('Safari') != -1) {
-                    // name.safari = 1;
-                // } else {
-                    // name.unknown = 1;
-                // }
-            // }
-            
             ret = {
                 engine:     engine,
                 browser:    browser,
@@ -293,5 +263,6 @@ define('bom', function() {
             return ret;
         }
     };
+	doly.mix(doly, bom);
     return bom;
 });
