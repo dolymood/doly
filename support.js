@@ -2,7 +2,7 @@
  * module support
  */
 
-define('support', function() {
+define('support', ['$ready'], function() {
     'use strict';
 	
 	var div = document.createElement("div"),
@@ -11,6 +11,10 @@ define('support', function() {
 	support = doly.support = {
 	    
 	};
+	
+	doly.ready(function() {
+		
+	});
 	
 	return support;
 });

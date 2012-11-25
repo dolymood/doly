@@ -7,7 +7,7 @@
     
     var
     Op              = Object.prototype,
-    _$_              = window._$,
+    _$_             = window._$,
     HTML            = document.documentElement,
     HEAD            = document.head || document.getElementsByTagName('head')[0],
     toStr           = Op.toString,
