@@ -5,10 +5,17 @@
 define('query', ['$sizzle'], function(Sizzle) {
     'use strict';
 
-    var query = {
+    var
+	query = {
         
         find: Sizzle,
-        text: Sizzle.getText,
+        getText: function(elem) {
+		    var ret;
+			if (typeof elem === 'string') {
+			    elem = Sizzle(elem);
+			}
+			return Sizzle.getText(elem);
+		},
         expr: Sizzle.selectors,
         unique: Sizzle.uniqueSort,
         matches: Sizzle.matches,

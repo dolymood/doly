@@ -13,7 +13,7 @@ $(function() {
 			equal(qunit[0], getId('qunit'));
 			ok(_$(stop_button).matchesSelector('#stop_button'));
 			ok(_$('#qunit').matches(qunit));
-			equal(_$(stop_button).text(), 'Stop Tests');
+			equal(_$(stop_button).getText(), 'Stop Tests');
 			ok(_$(document.body).eleContains(_$.find('#id1')[0]));
 			start();
 		});
