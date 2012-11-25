@@ -21,7 +21,7 @@
     baseElement     = HEAD.getElementsByTagName('base')[0],
     hasOwnProperty  = Op.hasOwnProperty,
     
-    all = 'lang_fix,lang,support,class,flow,sizzle,query,bom,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
+    all = 'ready,lang_fix,lang,support,class,flow,sizzle,query,bom,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
     
     class2type = {
         'NaN'                     : 'NaN',
