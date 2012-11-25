@@ -13,7 +13,7 @@
     toStr           = Op.toString,
     __ID__          = 10,
     __UID_          = 1,
-    version         = '0.0.1',
+    version         = '0.0.1', 
     rmakeid         = /(#.+|\W)/g,
     modules         = {}, // 模块加载器的缓存对象
     loadings        = [], // 加载中的模块
