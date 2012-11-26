@@ -13,7 +13,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		},
 		
 		text: function(elems, item) {
-		    elems = init.call(this, elems);
+		    elems = init(elems);
 			return doly.access(elems, 0, item, function(el) {
 			    if (!el) {
                     return '';
@@ -55,16 +55,17 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			return [];
 		}
 		
-		var doc, nodes, context; //用作节点搜索的起点
+		var doc, context, nodes; //用作节点搜索的起点
 		if (doly.isArray(expr) && expr.__selector__) { // 处理参数
 		    context = expr[1] || document;
 			expr = expr[0];
 		}
-	   
 		if (expr.nodeType) {
 			return [expr];
 		}
-		this.selector = expr + "";
+		if (doly.isArrayLike(expr)) {
+		    
+		}
 		if ( typeof expr === "string" ) {
 			doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
 			var scope = context || doc;

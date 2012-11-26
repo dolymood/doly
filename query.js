@@ -8,20 +8,8 @@ define('query', ['$sizzle'], function(Sizzle) {
     var
 	query = {
         
-        find: function(selector, context, results) {
-		    if (typeof selector !== 'string') {
-			    return selector;
-			} else {
-			    return Sizzle(selector, context, results);
-			}
-		},
-        getText: function(elem) {
-		    var ret;
-			if (typeof elem === 'string') {
-			    elem = Sizzle(elem);
-			}
-			return Sizzle.getText(elem);
-		},
+        find: Sizzle,
+        text: Sizzle.getText,
         expr: Sizzle.selectors,
         unique: Sizzle.uniqueSort,
         matches: Sizzle.matches,
@@ -32,6 +20,6 @@ define('query', ['$sizzle'], function(Sizzle) {
     };
     
     query.expr[':'] = query.expr.pseudos;
-    doly.mixin(query);
+    doly.mix(doly, query);
     return query;
 });
