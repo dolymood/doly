@@ -37,7 +37,13 @@
     
     doly = function(obj) {
         if (obj instanceof doly) return obj; // 本身就是doly实例化对象
-        if (!(this instanceof doly)) return new doly(obj);
+        if (!(this instanceof doly)) {
+		    if (arguments.length > 1) {//选择器的情况[expr, context]
+			    obj = doly.slice(arguments);
+				obj.__selector__ = true; // 多个参数
+			}
+			return new doly(obj);
+		}
         this._wrapped = obj;
     },
     
