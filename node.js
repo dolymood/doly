@@ -56,7 +56,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		
 	}, _innerCache = {};
 	
-	function init(expr) {
+	function Node(expr) {
 		if (!expr) {
 			return [];
 		}
@@ -91,6 +91,8 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		}
 		
 	}
+	
+	
 	
 	doly.mixin(node);
 	return node;
