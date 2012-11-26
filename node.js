@@ -8,6 +8,12 @@ define('node', ['$support', '$data', '$query'], function(support) {
 	var node = {
 	    
 		text: function(elem, item) {
+		    if (doly.isArrayLike(elem)) {
+			    
+			}
+		},
+		
+		access: function() {
 		    
 		}
 		

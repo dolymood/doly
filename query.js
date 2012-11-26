@@ -8,7 +8,13 @@ define('query', ['$sizzle'], function(Sizzle) {
     var
 	query = {
         
-        find: Sizzle,
+        find: function(selector, context, results) {
+		    if (typeof selector !== 'string') {
+			    return selector;
+			} else {
+			    return Sizzle(selector, context, results);
+			}
+		},
         getText: function(elem) {
 		    var ret;
 			if (typeof elem === 'string') {
