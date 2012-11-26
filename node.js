@@ -7,6 +7,12 @@ define('node', ['$support', '$data', '$query'], function(support) {
 	
 	var node = {
 	    
+		find: function() {
+		    
+		},
+		
+		
+		
 		empty: function(elems) {
 		    elems = init(elems);
 			

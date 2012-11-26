@@ -172,6 +172,24 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         throw new Error(msg);
     };
     
+	lang.merge = function(first, second) {
+	    var l = second.length,
+			i = first.length,
+			j = 0;
+
+		if (typeof l === 'number') {
+			for (; j < l; j++) {
+				first[i++] = second[j];
+			}
+		} else {
+			while (second[j] !== void 0) {
+				first[i++] = second[j++];
+			}
+		}
+		first.length = i;
+		return first;
+	};
+	
     lang.makeArray = function(obj) {
         if (obj == null) {
             return [];
