@@ -135,7 +135,7 @@ define('data', ['$lang'], function() {
         }
     };
     
-    doly.mixin(retData);
+    doly.mix(doly, retData);
     return retData;
     
 });
