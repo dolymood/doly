@@ -11,11 +11,10 @@ $(function() {
 			var qunit = _$.find('#qunit');
 			var stop_button = _$.find('#stop_button')[0];
 			equal(qunit[0], getId('qunit'));
-			ok(_$(stop_button).matchesSelector('#stop_button'));
-			ok(_$('#qunit').matches(qunit));
-			equal(_$(stop_button).getText(), 'Stop Tests');
-			ok(_$(document.body).chain().find().eleContains(_$.find('#id1')[0]));
-			ok(_$(document.body).eleContains(_$.find('#id1')[0]));
+			ok(_$.matchesSelector(stop_button, '#stop_button'));
+			ok(_$.matches('#qunit', qunit));
+			equal(_$.text(stop_button), 'Stop Tests');
+			ok(_$.eleContains(_$.find('body')[0], _$.find('#id1')[0]));
 			start();
 		});
 	});

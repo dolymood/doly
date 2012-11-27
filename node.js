@@ -7,19 +7,22 @@ define('node', ['$support', '$data', '$query'], function(support) {
 	
 	var node = {
 	    
-		find: function() {
-		    
+		find: function(expr) {
+		    init.call(this, expr);
+			
+			return this;
 		},
 		
 		
 		
 		empty: function(elems) {
-		    elems = init(elems);
+		    init.call(this, elems);
 			
+			return this;
 		},
 		
 		text: function(elems, item) {
-		    elems = init(elems);
+		    init.call(this, elems);
 			return doly.access(elems, 0, item, function(el) {
 			    if (!el) {
                     return '';
@@ -56,7 +59,8 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		
 	}, _innerCache = {};
 	
-	function Node(expr) {
+	function init(expr) {
+		this.length = 0;
 		if (!expr) {
 			return [];
 		}
@@ -67,33 +71,47 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			expr = expr[0];
 		}
 		if (expr.nodeType) {
-			return [expr];
+			this.context = this[0] = expr;
+			this.length = 1;
+			return (this._wrapped = this);
 		}
-		if (doly.isArrayLike(expr)) {
-		    
+		if (doly.isArrayLike(context)) {
+		    this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
+			return doly(context).find(expr);
 		}
-		if ( typeof expr === "string" ) {
+		if (typeof expr === 'string') {
 			doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
 			var scope = context || doc;
-			if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
-				nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
+			if (expr.charAt(0) === '<' && expr.charAt(expr.length - 1) === '>' && expr.length >= 3) {
+				nodes = doly.parseHTML( expr, doc );//分支5: 动态生成新节点
 				nodes = nodes.childNodes
 			} else if( rtag.test( expr ) ){//分支6: getElementsByTagName
 				nodes  = scope[ TAGS ]( expr ) ;
 			} else{//分支7：进入选择器模块
 				nodes  = $.query( expr, scope );
 			}
-			return $.Array.merge( this, $.slice( nodes) );
+			return (this._wrapped = doly.merge(this, $.slice(nodes)));
 		}else {//分支8：处理数组，节点集合或者mass对象或window对象
 			this.ownerDocument = getDoc( expr[0] );
-			$.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
+			this._wrapped = doly.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
 			delete this.selector;
 		}
 		
 	}
 	
+	function getDoc(){
+        for (var i = 0, len = arguments.length, el; i < len; i++) {
+            if (el = arguments[i]) {
+                if (el.nodeType) {
+                    return el.nodeType === 9 ? el : el.ownerDocument;
+                } else if (el.setTimeout) {//widdow
+                    return el.document;
+                }
+            }
+        }
+        return document;
+    }
 	
-	
-	doly.mixin(node);
+	doly.mix(doly.prototype, node);
 	return node;
 });

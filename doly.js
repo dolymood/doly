@@ -21,7 +21,7 @@
     baseElement     = HEAD.getElementsByTagName('base')[0],
     hasOwnProperty  = Op.hasOwnProperty,
     
-    all = 'ready,lang_fix,lang,support,class,flow,sizzle,query,bom,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
+    all = 'DOMReady,lang_fix,lang,support,class,flow,sizzle,query,bom,data,node,attr,css_fix,css,event_fix,event,ajax,fx',
     
     class2type = {
         'NaN'                     : 'NaN',
@@ -339,6 +339,9 @@
             var modUrl = '',
                 ext = 'js',
                 tmp, st;
+			if (url === 'ready') {
+				return ['ready', 'js'];
+			}
             if (/^[-a-z0-9_$]{2,}$/i.test(url) && _config.alias[url]) {
                 modUrl = _config.alias[url];
             } else {
@@ -612,5 +615,12 @@
         }
         
     });
+	module.update('ready', STATUS.loading);
+	doly.require('$DOMReady', function() {
+		doly.ready(function() {
+		    module.update('ready', STATUS.complete);
+			doly.check();
+		});
+	});
     
 }(window, document);
