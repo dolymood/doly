@@ -243,10 +243,6 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         }
         return xml;
     };
-    
-	lang.parseHTML = function() {
-	    
-	};
 	
     lang.parseJSON = function(data) {
         if (!data || typeof data != 'string') return null;
