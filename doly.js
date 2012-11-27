@@ -251,12 +251,12 @@
         },
         
         // 给doly对象(包括prototype)添加自定义方法或者属性(仅限doly自身)
-        mixin: function(obj) {
+        mixin: function(obj, addToDoly) {
             var func, key;
             for (key in obj) {
                 if (doly.has(obj, key)) {
                     func = obj[key];
-                    doly[key] = func;
+					if (addToDoly) doly[key] = func;
                     if (type(func, 'Function')) {
                         (function(func, key) {
                             doly.prototype[key] = function() {

@@ -272,7 +272,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         if (func.bind === nativeBind) return nativeBind.apply(func, slice(arguments, 1));        
     };
     
-    doly.mixin(lang);
+    doly.mixin(lang, true);
     
     // 改变的原数组
     'pop,push,reverse,shift,sort,splice,unshift'.replace(rword, function(name) {
