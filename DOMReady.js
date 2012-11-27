@@ -1,8 +1,8 @@
 /**
- * module ready
+ * module DOMReady
  */
 
-define('ready', function() {
+define('DOMReady', function() {
     'use strict';
     
     var readyList = [],
