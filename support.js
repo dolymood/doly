@@ -3,7 +3,7 @@
  * clone from jquery(support.js)
  */
 
-define('support', ['$ready'], function() {
+define('support', function() {
     'use strict';
     
     var support,
@@ -176,7 +176,7 @@ define('support', ['$ready'], function() {
     }
 
     // Run tests that need a body at doc ready
-    doly.ready(function() {
+    doly.require('ready', function() {
         var container, div, tds, marginDiv,
             divReset = "padding:0;margin:0;border:0;display:block;overflow:hidden;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;",
             body = document.getElementsByTagName("body")[0];
@@ -185,7 +185,12 @@ define('support', ['$ready'], function() {
             // Return for frameset docs that don't have a body
             return;
         }
-
+		try {
+            var range = document.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !!range.createContextualFragment("<a>");
+            doly.commonRange = range;
+        } catch(e) { };
         container = document.createElement("div");
         container.style.cssText = "visibility:hidden;border:0;width:0;height:0;position:static;top:0;margin-top:1px";
         body.insertBefore( container, body.firstChild );
