@@ -26,6 +26,15 @@
 	<script src="query.js"></script>
 	<script src="bom.js"></script>
 	<script src="../node.js"></script>
+	<script>
+	
+	_$.require('ready', function() {
+		var a = _$('body');
+	    console.log(a.find('div'));
+		console.log(a.find('li'));
+	});
+	
+	</script>
 </head>
 <body>
     <div id="qunit">

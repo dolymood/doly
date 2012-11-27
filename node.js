@@ -5,23 +5,66 @@
 define('node', ['$support', '$data', '$query'], function(support) {
     'use strict';
 	
-	var node = {
+	var
+	push = Array.prototype.push,
+	node = {
 	    
+		pushStack: function(elems, name, selector) {
+		    var ret = new doly();
+			ret.__hasInit__ = true;
+			ret.length = 0;
+			if (doly.isArray(elems)) {
+				push.apply(ret, elems);
+			} else {
+				doly.merge(ret, elems);
+			}
+			ret.prevObject = this;
+			ret.context = this.context;
+			ret.ownerDocument = this.ownerDocument;
+			if (name === 'find') {
+				ret.selector = this.selector + (this.selector ? ' ' : '') + selector;
+			} else if (name) {
+				ret.selector = this.selector + '.' + name + '(' + selector + ')';
+			}
+			//ret._wrapped = ret;
+			return ret;
+		},
+		
 		find: function(expr) {
-		    init.call(this, expr);
-			return this;
+		    init.call(this);
+			var ret, i, len, tmp, self;
+			if (typeof expr !== 'string') {
+				self = this;
+				tmp = doly(expr);
+				init.call(tmp);
+				
+				return this.pushStack(tmp.filter(function(value, index, list) {
+					for ( i = 0, len = self.length; i < len; i++) {
+						if (doly.eleContains(self[i], value)) {
+							return true;
+						}
+					}
+				}));
+			}
+			ret = [];
+			for (i = 0, len = this.length; i < len; i++) {
+				doly.find(expr, this[i], ret);
+			}
+			ret = this.pushStack(doly.unique(ret));
+			ret.selector = (this.selector ? this.selector + ' ' : '' ) + expr;
+			return ret;
 		},
 		
 		
 		
 		empty: function(elems) {
-		    init.call(this, elems);
+		    init.call(this);
 			
 			return this;
 		},
 		
 		text: function(elems, item) {
-		    init.call(this, elems);
+		    init.call(this);
 			return doly.access(elems, 0, item, function(el) {
 			    if (!el) {
                     return '';
@@ -38,14 +81,14 @@ define('node', ['$support', '$data', '$query'], function(support) {
 	
 	var rtag = /^[a-zA-Z]+$/;
 	
-	function init(expr) {
-		var _wrapped = this._wrapped, doc, context, nodes; //用作节点搜索的起点
-		if (!this.__hasInit__ && _wrapped) {
-			this.__hasInit__ = true;
-			this.find(_wrapped);
-		}
+	function init() {
+		if (this.__hasInit__) return;
+		var expr = this._wrapped, _wrapped, doc, context, nodes; //用作节点搜索的起点
+	    this.__hasInit__ = true;
 		if (!expr) {
-			return [];
+			this.length = 0;
+			this._wrapped = [];
+			return this;
 		}
 		
 		if (doly.isArray(expr) && expr.__selector__) { // 处理参数
@@ -55,13 +98,14 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		if (expr.nodeType) {
 			this.context = this[0] = expr;
 			this.length = 1;
-			this._wrapped = expr;
+			this._wrapped = [expr];
 			return this;
 		}
 		if (doly.isArrayLike(context)) {
 		    this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
 			return doly(context).find(expr);
 		}
+		this.selector = expr + '';
 		if (typeof expr === 'string') {
 			doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
 			var scope = context || doc;
@@ -76,12 +120,12 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			_wrapped = this._wrapped = doly.slice(nodes);
 			this.length || (this.length = 0);
 			return doly.merge(this, _wrapped);
-		}else {//分支8：处理数组，节点集合或者mass对象或window对象
+		} else {//分支8：处理数组，节点集合或者mass对象或window对象
 			this.ownerDocument = getDoc(expr[0]);
 			_wrapped = this._wrapped = doly.isArrayLike(expr) ?  expr : [expr];
 			this.length || (this.length = 0);
 			doly.merge(this, _wrapped);
-			//delete this.selector;
+			delete this.selector;
 		}
 		
 	}

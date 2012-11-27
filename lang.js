@@ -73,6 +73,16 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         });
         return results;
     };
+	
+	lang.filter = function(obj, callback, context) {
+	    var results = [];
+		each(obj, function(value, index, list) {
+		    if (callback.call(context, value, index, list)) {
+			    results.push(value);
+			}
+		});
+		return results;
+	};
     
     lang.sortedIndex = function(array, obj, iterator, context) {
         iterator = iterator || doly.identity;
