@@ -416,6 +416,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
         return div.firstChild;
     }
 	
+	// 克隆节点 包含时间和数据
 	function cloneNode(node, dataAndEvents, deepDataAndEvents) {
         // 处理IE6-8下复制事件时一系列错误
         if (node.nodeType === 1) {
