@@ -13,10 +13,11 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		    var ret = new doly();
 			ret.__hasInit__ = true;
 			ret.length = 0;
+			ret._wrapped = [];
 			if (doly.isArray(elems)) {
-				push.apply(ret, elems);
+				push.apply(ret._wrapped, elems);
 			} else {
-				doly.merge(ret, elems);
+				doly.merge(ret._wrapped, elems);
 			}
 			ret.prevObject = this;
 			ret.context = this.context;
@@ -26,7 +27,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			} else if (name) {
 				ret.selector = this.selector + '.' + name + '(' + selector + ')';
 			}
-			//ret._wrapped = ret;
+			doly.merge(ret, ret._wrapped);
 			return ret;
 		},
 		
@@ -37,7 +38,6 @@ define('node', ['$support', '$data', '$query'], function(support) {
 				self = this;
 				tmp = doly(expr);
 				init.call(tmp);
-				
 				return this.pushStack(tmp.filter(function(value, index, list) {
 					for ( i = 0, len = self.length; i < len; i++) {
 						if (doly.eleContains(self[i], value)) {
@@ -54,8 +54,6 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			ret.selector = (this.selector ? this.selector + ' ' : '' ) + expr;
 			return ret;
 		},
-		
-		
 		
 		empty: function(elems) {
 		    init.call(this);
@@ -94,16 +92,18 @@ define('node', ['$support', '$data', '$query'], function(support) {
 		if (doly.isArray(expr) && expr.__selector__) { // 处理参数
 		    context = expr[1] || document;
 			expr = expr[0];
+			if (!(context.nodeType || context.__hasInit__)) {
+			    this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
+			    _wrapped = this._wrapped = context.find(expr)._wrapped;
+				this.length || (this.length = 0);
+				return doly.merge(this, _wrapped);
+			}
 		}
 		if (expr.nodeType) {
 			this.context = this[0] = expr;
 			this.length = 1;
 			this._wrapped = [expr];
 			return this;
-		}
-		if (doly.isArrayLike(context)) {
-		    this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-			return doly(context).find(expr);
 		}
 		this.selector = expr + '';
 		if (typeof expr === 'string') {
