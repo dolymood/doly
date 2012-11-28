@@ -125,7 +125,38 @@
             }
             return result;
         },
+		
+		/*
+         * 深度的将多个对象合并成一个新对象，后面的对象属性将覆盖前面的
+         * @param {Object} 一个或多个对象
+         * @return {Object} 合并后的新对象
+         */
+		deepMerge: function() {
+		    var result = {}, i = arguments.length;
+            for ( ; i-- ; ) {
+                mix(result, doly.deepClone(arguments[i]));
+            }
+            return result;
+		},
         
+		/*
+		 * 深度克隆函数
+		 */
+		deepClone: function deepClone(obj) {
+			var result, key;
+			if (obj === Object(obj)) {
+			    doly.type(obj, 'Array') ? result = [] : result = {};
+				for (key in obj) {
+				    if (doly.has(obj, key)) {
+					    result[key] = deepClone(obj[key]);
+					}
+				}
+				return result;
+			} else {
+			    return obj;
+			}
+		},
+		
         /*
          * 获得或者修改模块加载器的配置
          * @param {Object|String} ops 配置对象

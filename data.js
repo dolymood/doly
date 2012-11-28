@@ -132,7 +132,20 @@ define('data', ['$lang'], function() {
                 }
             }
             return data;
-        }
+        },
+		// 合并数据
+		mergeData: function(cur, src) {
+		    var oldData  = doly._data(src), curData = doly._data(cur), events = oldData.events;
+            if (oldData && curData) {
+                curData = doly.deepMerge(curData, oldData);
+                if (events) {
+                    curData.events = [];
+                    for (var i = 0, item; item = events[i++]; ) {
+                        doly.event.bind(cur, item);
+                    }
+                }
+            }
+		}
     };
     
     doly.mix(doly, retData);

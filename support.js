@@ -97,7 +97,8 @@ define('support', function() {
         shrinkWrapBlocks: false,
         reliableMarginRight: true,
         boxSizingReliable: true,
-        pixelPosition: false
+        pixelPosition: false,
+		insertAdjacentHTML: false
     };
 
     // Make sure checked status is properly cloned
@@ -174,7 +175,15 @@ define('support', function() {
             support[ i + "Bubbles" ] = isSupported;
         }
     }
-
+    
+	var table = div.getElementsByTagName("table")[0];
+    try {//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML( "afterBegin", "<tr><td>2</td></tr>" );
+        support.insertAdjacentHTML = true;
+    } catch( e ) { };
+	
     // Run tests that need a body at doc ready
     doly.require('ready', function() {
         var container, div, tds, marginDiv,

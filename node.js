@@ -55,15 +55,104 @@ define('node', ['$support', '$data', '$query'], function(support) {
 			return ret;
 		},
 		
-		empty: function(elems) {
+		size: function() {
 		    init.call(this);
-			
+			return this.length;
+		},
+		
+		sliceEle: function(start, end) {
+		    init.call(this);
+			return this.pushStack(doly.slice(this, start, end));
+		},
+		
+		getEle: function(num) {
+		    init.call(this);
+			return num == null ? doly.toArray(this) : this[num < 0 ? this.length + num : num];
+		},
+		
+		eachEle: function(callback) {
+		    init.call(this);
+			doly.each(function(item, index, ary) {
+			    return callback.call(item);
+			});
 			return this;
 		},
 		
-		text: function(elems, item) {
+		mapEle: function(callback) {
 		    init.call(this);
-			return doly.access(elems, 0, item, function(el) {
+			return this.pushStack(doly.map(this, function(item, index, ary) {
+			    return callback.call(item);
+			}));
+		},
+		
+		eq: function(i) {
+			return (i = +i) === -1 ? this.sliceEle(i) : this.sliceEle(i, i + 1);
+		},
+		
+		gt: function(i) {
+            return this.sliceEle(i + 1, this.length);
+        },
+		
+        lt: function(i) {
+            return this.sliceEle(0, i);
+        },
+		
+		first: function() {
+			return this.eq(0);
+		},
+
+		last: function() {
+			return this.eq(-1);
+		},
+		
+		even: function() {
+            init.call(this);
+			return this.pushStack(doly.filter(this, function(item, i) {
+                return i % 2 === 0;
+            }));
+        },
+		
+        odd: function() {
+            init.call(this);
+			return this.pushStack(doly.filter(this, function(item, i) {
+                return i % 2 === 1;
+            }));
+        },
+		
+		remove: function(selector, keepData) {
+		    init.call(this);
+			var i = 0, ele;
+			for (; (ele = this[i++]) != null; ) {
+			    if (!selector || doly.filterEle(selector, [ele]).length) {
+				    if (!keepData && ele.nodeType === 1) {
+						doly.cleanData(ele.getElementsByTagName('*'));
+						doly.cleanData([ele]);
+					}
+					if (ele.parentNode) {
+						ele.parentNode.removeChild(ele);
+					}
+				}
+			}
+			return this;
+		},
+		
+		empty: function() {
+		    init.call(this);
+			var i = 0, ele;
+			for (; (ele = this[i++]) != null; ) {
+			    if (ele.nodeType === 1) {
+				    doly.cleanData(ele.getElementsByTagName('*'));
+				}
+				while (ele.firstChild) {
+					ele.removeChild(ele.firstChild);
+				}
+			}
+			return this;
+		},
+		
+		text: function(item) {
+		    init.call(this);
+			return doly.access(this, 0, item, function(el) {
 			    if (!el) {
                     return '';
                 } else if (el.tagName == 'OPTION' || el.tagName == 'SCRIPT') {
@@ -71,14 +160,63 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 }
                 return el.textContent || el.innerText || doly.getText([el]);
 			}, function() {
-			    
-			}, elems);
+			    this.empty().append((this.ownerDocument || document).createTextNode(item));
+			}, this);
+		},
+		
+		html: function(item) {
+		    init.call(this);
+			item = item === void 0 ? item : item == null ?  '' : item + '';
+			return doly.access(this, 0, item, function(el) {
+                // 如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
+                // 为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
+                // 的nodeType为9,IE称之为XML数据岛
+                if (el && (el.nodeType === 1 || /xml/i.test(el.nodeName))) {
+                    return 'innerHTML' in el ? el.innerHTML : innerHTML(el);
+                }
+                return null;
+            }, function(el, _, value) {
+                // 接着判断innerHTML属性是否符合标准,不再区分可读与只读
+                // 用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
+                // 及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
+                if (support.innerHTML && (!rcreate.test(value) && !rnest.test(value))) {
+                    try {
+                        for (var i = 0; el = this[i++]; ) {
+                            if (el.nodeType === 1) {
+                                doly.slice(el.getElementsByTagName('*')).each(clearData);
+                                el.innerHTML = value;
+                            }
+                        }
+                        return;
+                    } catch(e) {};
+                }
+                this.empty().append(value);
+            }, this);
+		},
+		
+		outerHTML: function(item) {
+		    init.call(this);
+			return doly.access(this, 0, item, function(el) {
+                if (el && el.nodeType === 1) {
+                    return 'outerHTML' in el ? el.outerHTML : outerHTML(el);
+                }
+                return null;
+            }, function(){
+                this.empty().replace(item);
+            }, this);
+		},
+		
+		clone: function(dataAndEvents, deepDataAndEvents) {
+		    dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
+            deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
+            return this.mapEle(function () {
+                return cloneNode(this, dataAndEvents, deepDataAndEvents);
+            });
 		}
 		
 	};
 	
 	var rtag = /^[a-zA-Z]+$/;
-	
 	function init() {
 		if (this.__hasInit__) return;
 		var expr = this._wrapped, _wrapped, doc, context, nodes; //用作节点搜索的起点
@@ -180,7 +318,199 @@ define('node', ['$support', '$data', '$query'], function(support) {
     rcreate = support.htmlSerialize ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
     types = doly.oneObject('text/javascript','text/ecmascript','application/ecmascript','application/javascript','text/vbscript'),
     //需要处理套嵌关系的标签
-    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/;
+    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+	adjacent = 'insertAdjacentHTML',
+	insertApapter = {
+        prepend: function(el, node) {
+            el.insertBefore(node, el.firstChild);
+        },
+        append: function(el, node) {
+            el.appendChild(node);
+        },
+        before: function(el, node) {
+            el.parentNode.insertBefore(node, el);
+        },
+        after: function(el, node) {
+            el.parentNode.insertBefore(node, el.nextSibling);
+        },
+        replace: function(el, node) {
+            el.parentNode.replaceChild(node, el);
+        },
+        prepend2: function(el, html) {
+            el[adjacent]('afterBegin', html);
+        },
+        append2: function(el, html) {
+            el[adjacent]('beforeEnd', html);
+        },
+        before2: function( el, html) {
+            el[adjacent]('beforeBegin', html);
+        },
+        after2: function(el, html) {
+            el[adjacent]('afterEnd', html);
+        }
+    };
+	
+	var insertAdjacentNode = function(elems, fn, item) {
+        for(var i = 0, el; el = elems[i]; i++) {//第一个不用复制，其他要
+            fn( el, i ? cloneNode(item, true, true) : item);
+        }
+    }
+    var insertAdjacentHTML = function(elems, slowInsert, fragment, fast, fastInsert, html) {
+        for (var i = 0, el; el = elems[i++];) {
+            if (fast) {
+                fastInsert(el, html);
+            } else {
+                slowInsert(el, fragment.cloneNode(true));
+            }
+        }
+    }
+    var insertAdjacentFragment = function(elems, fn, item, doc) {
+        var fragment = (doc || document).createDocumentFragment();
+        for (var i = 0, el; el = elems[i++];) {
+            fn(el, makeFragment(item, fragment, i > 1));
+        }
+    }
+    var makeFragment = function(nodes, fragment, bool) {
+        //只有非NodeList的情况下我们才为i递增;
+        var ret = fragment.cloneNode(false), go= !nodes.item;
+        for(var i = 0, node; node = nodes[i]; go && i++) {
+            ret.appendChild(bool && cloneNode(node, true, true) || node);
+        }
+        return ret;
+    }
+    /**
+     * 实现insertAdjacentHTML的增强版
+     * @param {doly}  nodes doly实例
+     * @param {String} type 方法名
+     * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或doly对象
+     * @param {Document}  doc 执行环境所在的文档
+     * @return {doly} 返回更改后的nodes
+     */
+    function manipulate(nodes, type, item, doc) {
+        var elems = doly.slice(nodes).filter(function(el) {
+            return el.nodeType === 1;//转换为纯净的元素节点数组
+        });
+        if (item.nodeType) {
+            //如果是传入元素节点或文本节点或文档碎片
+            insertAdjacentNode(elems, insertApapter[type], item);
+        } else if (typeof item === 'string') {
+            //如果传入的是字符串片断
+            var
+			fragment = doly.parseHTML(item, doc),
+            //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
+            fast = (type !== 'replace') && support[adjacent] && !rnest.test(item);
+            insertAdjacentHTML(elems, insertApapter[type], fragment, fast, insertApapter[type + '2'], item);
+        } else if (item.length) {
+            //如果传入的是HTMLCollection nodeList doly实例，将转换为文档碎片
+            insertAdjacentFragment(elems, insertApapter[type], item, doc) ;
+        }
+        return nodes;
+    }
+	
+	var div = document.createElement('div'),//缓存parser，防止反复创建
+	    unknownTag = '<?XML:NAMESPACE';
+    function shimCloneNode(outerHTML, tree) {
+        tree.appendChild(div);
+        div.innerHTML = outerHTML;
+        tree.removeChild(div);
+        return div.firstChild;
+    }
+	
+	function cloneNode(node, dataAndEvents, deepDataAndEvents) {
+        // 处理IE6-8下复制事件时一系列错误
+        if (node.nodeType === 1) {
+            var bool; // !undefined === true;
+            //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
+            if (!support.html5Clone && node.outerHTML) { //延迟创建检测元素
+                var outerHTML = document.createElement(node.nodeName).outerHTML;
+                bool = outerHTML.indexOf(unknownTag) // !0 === true;
+            }
+            //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
+            var neo = !bool ? shimCloneNode(node.outerHTML, document.documentElement) : node.cloneNode(true), src, neos, i;
+            if (!support.noCloneEvent) {
+                fixNode(neo, node);
+                src = node.getElementsByTagName('*');
+                neos = neo.getElementsByTagName('*');
+                for (i = 0; src[i]; i++) {
+                    fixNode(neos[i], src[i]);
+                }
+            }
+            // 复制自定义属性，事件也被当作一种特殊的能活动的数据
+            if (dataAndEvents) {
+                doly.mergeData(neo, node);
+                if (deepDataAndEvents) {
+                    src =  node.getElementsByTagName('*');
+                    neos = neo.getElementsByTagName('*');
+                    for (i = 0; src[i]; i++) {
+                        doly.mergeData(neos[i], src[i]);
+                    }
+                }
+            }
+            src = neos = null;
+            return neo;
+        } else {
+            return node.cloneNode(true);
+        }
+    }
+	
+	//修正IE下对数据克隆时出现的一系列问题
+    function fixNode(clone, src) {
+        if (src.nodeType == 1) {
+            //只处理元素节点
+            var nodeName = clone.nodeName.toLowerCase();
+            //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
+            clone.clearAttributes();
+            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
+            clone.mergeAttributes(src, false);
+            //IE6-8无法复制其内部的元素
+            if (nodeName === 'object') {
+                clone.outerHTML = src.outerHTML;
+                if (support.html5Clone && (src.innerHTML && !clone.innerHTML.trim())) {
+                    clone.innerHTML = src.innerHTML;
+                }
+            } else if (nodeName === 'input' && (src.type === 'checkbox' || src.type == 'radio')) {
+                //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
+                if (src.checked) {
+                    clone.defaultChecked = clone.checked = src.checked;
+                }
+                // 除Chrome外，所有浏览器都会给没有value的checkbox一个默认的value值”on”。
+                if (clone.value !== src.value) {
+                    clone.value = src.value;
+                }
+            } else if (nodeName === 'option') {
+                clone.selected = src.defaultSelected; // IE6-8 无法保持选中状态
+            } else if ( nodeName === 'input' || nodeName === 'textarea') {
+                clone.defaultValue = src.defaultValue; // IE6-8 无法保持默认值
+            } else if (nodeName === 'script' && clone.text !== src.text) {
+                clone.text = src.text; // IE6-8不能复制script的text属性
+            }
+        }
+    }
+	
+	function outerHTML(el) {
+        switch(el.nodeType + '') {
+            case '1':
+            case '9':
+                return 'xml' in el ? el.xml : new XMLSerializer().serializeToString(el);
+            case '3':
+            case '4':
+                return el.nodeValue;
+            case '8':
+                return '<!--' + el.nodeValue + '-->';
+        }
+    }
+    function innerHTML(el) {
+        for (var i = 0, c, ret = []; c = el.childNodes[i++];) {
+            ret.push(outerHTML(c));
+        }
+        return ret.join('');
+    }
+	
+	// 清除ele上的数据
+	function clearData(ele) {
+	    doly.removeData(ele);
+	    ele.clearAttributes && ele.clearAttributes();
+	}
 	
 	doly.mix(doly, {
 	    parseHTML: function(html, doc) {
@@ -256,7 +586,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
             setter = typeof setter === 'function' ? setter : getter;
             scope = arguments[arguments.length - 1];
             if (typeof key === 'object') {
-                for(k in key) { // 设置所有的元素设置属性
+                for (k in key) { // 设置所有的元素设置属性
                     for (i = 0; i < length; i++) {
                         setter.call(scope, elems[i], k, key[k]);
                     }
@@ -270,9 +600,47 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 return elems;
             } //取得第一个元素的属性, getter的参数总是少于setter
             return length ? getter.call(scope, elems[0], key) : void 0;
+		},
+		
+		// 清除elems数据
+		cleanData: function(elems) {
+		    var len = elems.length, i = 0, ele;
+			if (!len) return;
+			for (; (ele = elems[i++]) != null; ) {
+			    if (ele.nodeType === 1) clearData(ele);
+			}
+		},
+		
+		filterEle: function(expr, elems, not) {
+		    if (not) {
+				expr = ':not(' + expr + ')';
+			}
+			return elems.length === 1 ?
+				doly.find.matchesSelector(elems[0], expr) ? [elems[0]] : [] :
+				doly.find.matches(expr, elems);
 		}
 	});
 	
 	doly.mix(doly.prototype, node);
+	'push,unshift,pop,shift,splice,sort,reverse'.replace(doly.rword, function(method) {
+        var Ap = Array.prototype;
+		doly.prototype[method + 'Ele'] = function() {
+			init.apply(this);
+			Ap[method].apply(this, arguments);
+            return this;
+        }
+    });
+    'append,prepend,before,after,replace'.replace(doly.rword, function(method) {
+        doly.prototype[method] = function(item) {
+            init.call(this);
+			return manipulate(this, method, item, this.ownerDocument);
+        }
+        doly.prototype[method + 'To'] = function(item) {
+		    var tmp = doly(item, this.ownerDocument);
+			init.call(tmp);
+			tmp[method](this);
+            return this;
+        }
+    });
 	return node;
 });
