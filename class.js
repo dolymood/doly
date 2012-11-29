@@ -7,9 +7,9 @@ define('class', ['$lang'], function() {
     
     var
     F        = function() {},
-	mix      = doly.mix,
+    mix      = doly.mix,
     isArray  = Array.isArray,
-	unextend = doly.oneObject(['_super', '_superClass', 'extend', 'implement', 'prototype']),
+    unextend = doly.oneObject(['_super', '_superClass', 'extend', 'implement', 'prototype']),
 
     Class    = function(o) {
         if (!(this instanceof Class) && isFunction(o)) {
@@ -27,7 +27,7 @@ define('class', ['$lang'], function() {
         var C, init;
         if (!doly.isFunction(P)) {
             properties = P;
-			P = null;
+            P = null;
         }
         properties || (properties = {});
         P || (P = properties.Extends || Class);
@@ -55,12 +55,14 @@ define('class', ['$lang'], function() {
             key, value;
 
         for (key in properties) {
-            value = properties[key];
-            if (doly.has(mutators, key)) {
-                mutators[key].call(this, value);
-                delete properties[key];
-            } else {
-                proto[key] = value;
+            if (doly.has(properties, key)) {
+                value = properties[key];
+                if (doly.has(mutators, key)) {
+                    mutators[key].call(this, value);
+                    delete properties[key];
+                } else {
+                    proto[key] = value;
+                }
             }
         }
     }
@@ -72,18 +74,18 @@ define('class', ['$lang'], function() {
 
     function inherit(C, P, properties) {
         var key;
-		F.prototype = P.prototype;
+        F.prototype = P.prototype;
         C.prototype = new F;//添加原型方法
         //复制父类的静态成员
-		for (key in P) {
-		    if (doly.has(P, key) && !unextend[key]) {
-			    C[key] = P[key];
-			}
-		}
+        for (key in P) {
+            if (doly.has(P, key) && !unextend[key]) {
+                C[key] = P[key];
+            }
+        }
         C._super = P.prototype;//重新指定_super方便调用
         C._superClass = P;
         implement.call(C, properties);
-		C.prototype.constructor = C;//修整constructor
+        C.prototype.constructor = C;//修整constructor
     }
 
     doly.mutators = {
@@ -100,5 +102,6 @@ define('class', ['$lang'], function() {
     doly.classify = classify;
     doly.Class = Class;
     doly.factory = Class.create;
+    doly.implement = implement;
     return Class;
 });

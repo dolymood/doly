@@ -133,9 +133,9 @@ define('data', ['$lang'], function() {
             }
             return data;
         },
-		// 合并数据
-		mergeData: function(cur, src) {
-		    var oldData  = doly._data(src), curData = doly._data(cur), events = oldData.events;
+        // 合并数据
+        mergeData: function(cur, src) {
+            var oldData  = doly._data(src), curData = doly._data(cur), events = oldData.events;
             if (oldData && curData) {
                 doly.deepMergeFirst(curData, oldData);
                 if (events) {
@@ -145,7 +145,7 @@ define('data', ['$lang'], function() {
                     }
                 }
             }
-		}
+        }
     };
     
     doly.mix(doly, retData);

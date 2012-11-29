@@ -206,7 +206,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
             }, this);
         },
         
-        clone: function(dataAndEvents, deepDataAndEvents) {
+        cloneEle: function(dataAndEvents, deepDataAndEvents) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
             return this.mapEle(function () {
@@ -333,7 +333,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
             this.length || (this.length = 0);
             return doly.merge(this, _wrapped);
         } else {//分支8：处理数组，节点集合或者doly对象(doly(expr))或window对象
-            if (expr.doly_ && !expr.__hasInit__) { // doly(selector)
+            if (expr.doly_ && !expr.__hasInit__) { // doly(selector) 是doly实例 但是没有init
                 init.apply(expr);
             }
             this.ownerDocument = getDoc(expr[0]);
@@ -728,10 +728,24 @@ define('node', ['$support', '$data', '$query'], function(support) {
     });
     var dolyPt = doly.prototype;
     doly.mix(dolyPt, node);
+    doly.mix(dolyPt, { // 实现data和removeData
+        data: function(key, item, pv) {
+            init.call(this);
+            return doly.access(this, key, item, function(el){
+                return doly.data(el, key, item,  pv === true);
+            });
+        },
+        removeData: function(key, pv) {
+            init.call(this);
+            return this.each(function() {
+                doly.removeData(this, key, pv);
+            });
+        }
+    });
     'push,unshift,pop,shift,splice,sort,reverse'.replace(doly.rword, function(method) {
         var Ap = Array.prototype;
         dolyPt[method + 'Ele'] = function() {
-            init.apply(this);
+            init.call(this);
             Ap[method].apply(this, arguments);
             return this;
         }
