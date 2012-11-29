@@ -40,7 +40,7 @@ define('DOMReady', function() {
             while(readyFn = readyList[i++]) {
                 readyFn.call(window);
             }
-            readyList = undefined;
+            readyList = void 0;
         }
     }
     // 如果已经是complete状态了
