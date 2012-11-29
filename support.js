@@ -269,7 +269,7 @@ define('support', function() {
             div.innerHTML = "<div></div>";
             div.firstChild.style.width = "5px";
             support.shrinkWrapBlocks = ( div.offsetWidth !== 3 );
-
+            
             container.style.zoom = 1;
         }
 
