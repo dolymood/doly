@@ -137,7 +137,7 @@ define('data', ['$lang'], function() {
 		mergeData: function(cur, src) {
 		    var oldData  = doly._data(src), curData = doly._data(cur), events = oldData.events;
             if (oldData && curData) {
-                curData = doly.deepMerge(curData, oldData);
+                doly.deepMergeFirst(curData, oldData);
                 if (events) {
                     curData.events = [];
                     for (var i = 0, item; item = events[i++]; ) {

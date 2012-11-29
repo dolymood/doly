@@ -38,12 +38,12 @@
     doly = function(obj) {
         if (obj instanceof doly) return obj; // 本身就是doly实例化对象
         if (!(this instanceof doly)) {
-		    if (arguments.length > 1) {//选择器的情况[expr, context]
-			    obj = doly.slice(arguments);
-				obj.__selector__ = true; // 多个参数
-			}
-			return new doly(obj);
-		}
+            if (arguments.length > 1) {//选择器的情况[expr, context]
+                obj = doly.slice(arguments);
+                obj.__selector__ = true; // 多个参数
+            }
+            return new doly(obj);
+        }
         this._wrapped = obj;
     },
     
@@ -119,44 +119,60 @@
          * @return {Object} 合并后的新对象
          */
         merge: function() {
-            var result = {}, i = arguments.length;
-            for ( ; i-- ; ) {
+            var result = {}, i = 0, len = arguments.length;
+            for ( ; i < len ; i++) {
                 mix(result, arguments[i]);
             }
             return result;
         },
-		
-		/*
+        
+        /*
          * 深度的将多个对象合并成一个新对象，后面的对象属性将覆盖前面的
          * @param {Object} 一个或多个对象
          * @return {Object} 合并后的新对象
          */
-		deepMerge: function() {
-		    var result = {}, i = arguments.length;
-            for ( ; i-- ; ) {
+        deepMerge: function() {
+            var result = {}, i = 0, len = arguments.length;
+            for ( ; i < len ; i++) {
                 mix(result, doly.deepClone(arguments[i]));
             }
             return result;
-		},
+        },
         
-		/*
-		 * 深度克隆函数
-		 */
-		deepClone: function deepClone(obj) {
-			var result, key;
-			if (obj === Object(obj)) {
-			    doly.type(obj, 'Array') ? result = [] : result = {};
-				for (key in obj) {
-				    if (doly.has(obj, key)) {
-					    result[key] = deepClone(obj[key]);
-					}
-				}
-				return result;
-			} else {
-			    return obj;
-			}
-		},
-		
+        /*
+         * 深度的将将多个对象合并到第一个参数中
+         * @param {Object} 一个或多个对象
+         * @return {Object} 合并后的新对象
+         */
+        deepMergeFirst: function(target, k, v) {
+            var obj, key, i, len;
+            if (typeof k === 'string') {
+                target[key] = doly.deepClone(v);
+            }
+            for (i = 1, len = arguments.length; i < len; i++) {
+                mix(target, doly.deepClone(arguments[i]));
+            }
+            return target;
+        },
+        
+        /*
+         * 深度克隆函数
+         */
+        deepClone: function deepClone(obj) {
+            var result, key;
+            if (obj === Object(obj)) {
+                doly.type(obj, 'Array') ? result = [] : result = {};
+                for (key in obj) {
+                    if (doly.has(obj, key)) {
+                        result[key] = deepClone(obj[key]);
+                    }
+                }
+                return result;
+            } else {
+                return obj;
+            }
+        },
+        
         /*
          * 获得或者修改模块加载器的配置
          * @param {Object|String} ops 配置对象
@@ -287,7 +303,7 @@
             for (key in obj) {
                 if (doly.has(obj, key)) {
                     func = obj[key];
-					if (addToDoly) doly[key] = func;
+                    if (addToDoly) doly[key] = func;
                     if (type(func, 'Function')) {
                         (function(func, key) {
                             doly.prototype[key] = function() {
@@ -370,9 +386,9 @@
             var modUrl = '',
                 ext = 'js',
                 tmp, st;
-			if (url === 'ready') {
-				return ['ready', 'js'];
-			}
+            if (url === 'ready') {
+                return ['ready', 'js'];
+            }
             if (/^[-a-z0-9_$]{2,}$/i.test(url) && _config.alias[url]) {
                 modUrl = _config.alias[url];
             } else {
@@ -646,12 +662,12 @@
         }
         
     });
-	module.update('ready', STATUS.loading);
-	doly.require('$DOMReady', function() {
-		doly.ready(function() {
-		    module.update('ready', STATUS.complete);
-			doly.check();
-		});
-	});
+    module.update('ready', STATUS.loading);
+    doly.require('$DOMReady', function() {
+        doly.ready(function() {
+            module.update('ready', STATUS.complete);
+            doly.check();
+        });
+    });
     
 }(window, document);
