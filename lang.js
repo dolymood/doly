@@ -209,6 +209,25 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
 		return first;
 	};
 	
+	// 数组或者类数组的深度合并
+	lang.deepMerge = function(first, second) {
+	    var l = second.length,
+			i = first.length,
+			j = 0;
+
+		if (typeof l === 'number') {
+			for (; j < l; j++) {
+				first[i++] = doly.deepClone(second[j]);
+			}
+		} else {
+			while (second[j] !== void 0) {
+				first[i++] = doly.deepClone(second[j++]);
+			}
+		}
+		first.length = i;
+		return first;
+	};
+	
     lang.makeArray = function(obj) {
         if (obj == null) {
             return [];

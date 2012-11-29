@@ -148,6 +148,7 @@
             var obj, key, i, len;
             if (typeof k === 'string') {
                 target[key] = doly.deepClone(v);
+				return target;
             }
             for (i = 1, len = arguments.length; i < len; i++) {
                 mix(target, doly.deepClone(arguments[i]));
