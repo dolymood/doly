@@ -40,7 +40,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 init.call(tmp);
                 return this.pushStack(tmp.filter(function(value, index, list) {
                     for ( i = 0, len = self.length; i < len; i++) {
-                        if (doly.eleContains(self[i], value)) {
+                        if (doly.containsEle(self[i], value)) {
                             return true;
                         }
                     }
@@ -50,7 +50,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
             for (i = 0, len = this.length; i < len; i++) {
                 doly.find(expr, this[i], ret);
             }
-            ret = this.pushStack(doly.unique(ret));
+            ret = this.pushStack(ret.length > 1 ? doly.unique(ret) : ret);
             ret.selector = (this.selector ? this.selector + ' ' : '' ) + expr;
             return ret;
         },
@@ -201,51 +201,125 @@ define('node', ['$support', '$data', '$query'], function(support) {
                     return 'outerHTML' in el ? el.outerHTML : outerHTML(el);
                 }
                 return null;
-            }, function(){
+            }, function() {
                 this.empty().replace(item);
             }, this);
         },
         
         clone: function(dataAndEvents, deepDataAndEvents) {
-            dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
+			dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
             return this.mapEle(function () {
                 return cloneNode(this, dataAndEvents, deepDataAndEvents);
             });
-        }
+        },
+		
+		has: function(selector) {
+		    init.call(this);
+			var elems = init.call(doly(selector, this)),
+			    len = elems.length, i;
+			return this.filterEle(function() {
+			    for (i = 0; i < len; i++) {
+					if (doly.containsEle(this, elems[i])) {
+						return true;
+					}
+				}
+			});
+		},
+		
+		not: function(selector) {
+			init.call(this);
+			return this.pushStack(winnow(this, selector, true));
+		},
+
+		filterEle: function(selector) {
+			init.call(this);
+			return this.pushStack(winnow(this, selector, false));
+		},
+		
+		is: function(selector) {
+		    init.call(this);
+			var elems = doly.find(selector),
+			    i = 0,
+				obj = {}, uid, node;
+            for ( ; node = elems[i++]; ) {
+                uid = doly.getUID(node);
+                obj[uid] = 1;
+            }
+            return doly.slice(this).some(function(el) {
+                return obj[doly.getUID(el)];
+            });
+		},
+		
+		closest: function(selectors, context) {
+		    init.call(this);
+			var elems = init.call(doly(selectors, context || this.ownerDocument)),
+			    i = 0, ret = [], cur;
+			for ( ; cur = this[i++]; ) {
+                while (cur) {
+                    if (doly.inArray(cur, elems) > -1) {
+                        ret.push(cur);
+                        break;
+                    } else { // 否则把当前节点变为其父节点
+                        cur = cur.parentNode;
+                        if (!cur || !cur.ownerDocument || cur === context || cur.nodeType === 11) {
+                            break;
+                        }
+                    }
+                }
+            }
+            ret = ret.length > 1 ? doly.unique(ret) : ret;
+            return this.pushStack(ret);
+		},
         
+		index: function(elem) {
+		    init.call(this);
+			var first = this[0];
+            if (!elem) { //如果没有参数，返回第一元素位于其兄弟的位置
+                return (first && first.parentNode) ? this.first().prevAll().length : -1;
+            }
+            // 返回第一个元素在新实例中的位置
+            if (typeof elem === 'string') {
+				return doly.inArray(this[0], init.call(doly(elem)));
+            }
+            return doly.inArray(elem.doly_ ? (elem.__hasInit__ ? elem[0] : init.call(elem)[0]) : elem, this);
+		}
     };
     
     var rtag = /^[a-zA-Z]+$/;
     function init() {
-        if (this.__hasInit__) return;
+        if (this.__hasInit__) return this; // 已经初始化过了
         var expr = this._wrapped, _wrapped, doc, context, nodes; //用作节点搜索的起点
-        this.__hasInit__ = true;
-        if (!expr) {
+        this.__hasInit__ = true; // 设置已经初始化参数
+        if (!expr) { // 没有参数的情况 直接返回
             this.length = 0;
             this._wrapped = [];
             return this;
         }
         
-        if (doly.isArray(expr) && expr.__selector__) { // 处理参数
-            context = expr[1] || document;
-            expr = expr[0];
-            if (!(context.nodeType || context.__hasInit__)) {
+        if (doly.isArray(expr) && expr.__selector__) { // 处理参数-doly(selector, context)
+            context = expr[1] || document; // context
+            expr = expr[0]; // selector|expr
+            if (!context.nodeType) { // 如果context不是元素
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-                _wrapped = this._wrapped = context.find(expr)._wrapped;
+				if (!(context.find && context.find === this.find)) { // context 不是doly实例化对象
+				    context = new doly(context); // 实例化之
+				}
+                _wrapped = this._wrapped = context.find(expr)._wrapped; // 根据context查找expr，得到结果
                 this.length || (this.length = 0);
-                return doly.merge(this, _wrapped);
+                return doly.merge(this, _wrapped); // 将结果合并到this上
             }
         }
-        if (expr.nodeType) {
+		
+        if (expr.nodeType) { // 元素 直接返回即可
             this.context = this[0] = expr;
             this.length = 1;
             this._wrapped = [expr];
             return this;
         }
         this.selector = expr + '';
-        if (typeof expr === 'string') {
-            doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
+        if (typeof expr === 'string') { // 是字符串
+            doc = this.ownerDocument = !context ? document : getDoc(context, context[0]);
             var scope = context || doc;
             if (expr.charAt(0) === '<' && expr.charAt(expr.length - 1) === '>' && expr.length >= 3) {
                 nodes = doly.parseHTML(expr, doc);//分支5: 动态生成新节点
@@ -258,16 +332,47 @@ define('node', ['$support', '$data', '$query'], function(support) {
             _wrapped = this._wrapped = doly.slice(nodes);
             this.length || (this.length = 0);
             return doly.merge(this, _wrapped);
-        } else {//分支8：处理数组，节点集合或者mass对象或window对象
-            this.ownerDocument = getDoc(expr[0]);
+        } else {//分支8：处理数组，节点集合或者doly对象(doly(expr))或window对象
+            if (expr.doly_ && !expr.__hasInit__) { // doly(selector)
+			    init.apply(expr);
+			}
+			this.ownerDocument = getDoc(expr[0]);
             _wrapped = this._wrapped = doly.isArrayLike(expr) ?  expr : [expr];
             this.length || (this.length = 0);
             doly.merge(this, _wrapped);
             delete this.selector;
-        }
-        
+			return this;
+        } 
     }
-    
+	
+    // filterEle and not(^异或)
+	function winnow(elems, selector, not) {
+	    var ret = [], doc = elems.ownerDocument;
+		elems = elems._wrapped;
+		if (!doly.isArray(elems)) {
+		    elems = doly.slice(elems);
+		}
+        if (typeof selector === 'string') {
+            var fits = doly.find(selector, doc);
+            elems.forEach(function(node) {
+                if (node.nodeType === 1) {
+					if ((fits.indexOf(node) !== -1) ^ not) {
+                        ret.push(node);
+                    }
+                }
+            });
+        } else if (doly.isFunction(selector)) {
+            return elems.filter(function(node, i) {
+                return !!selector.call(node, node, i) ^ not;
+            });
+        } else if (selector.nodeType) {
+            return elems.filter(function(node) {
+                return (node === expr) ^ not;
+            });
+        }
+        return ret;
+	}
+	
     function getDoc(){
         for (var i = 0, len = arguments.length, el; i < len; i++) {
             if (el = arguments[i]) {
@@ -621,27 +726,106 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 doly.find.matches(expr, elems);
         }
     });
-    
-    doly.mix(doly.prototype, node);
+    var dolyPt = doly.prototype;
+    doly.mix(dolyPt, node);
     'push,unshift,pop,shift,splice,sort,reverse'.replace(doly.rword, function(method) {
         var Ap = Array.prototype;
-        doly.prototype[method + 'Ele'] = function() {
+        dolyPt[method + 'Ele'] = function() {
             init.apply(this);
             Ap[method].apply(this, arguments);
             return this;
         }
     });
     'append,prepend,before,after,replace'.replace(doly.rword, function(method) {
-        doly.prototype[method] = function(item) {
+        dolyPt[method] = function(item) {
             init.call(this);
             return manipulate(this, method, item, this.ownerDocument);
         }
-        doly.prototype[method + 'To'] = function(item) {
+        dolyPt[method + 'To'] = function(item) {
             var tmp = doly(item, this.ownerDocument);
             init.call(tmp);
             tmp[method](this);
             return this;
         }
     });
+	
+	var uniqOne = doly.oneObject(['children', 'contents', 'next', 'prev']);
+    function travel(el, prop, expr) {
+        var result = [], i = 0;
+        while ((el = el[prop])) {
+            if (el && el.nodeType === 1) {
+                result[i++] = el;
+                if (expr === true) {
+                    break;
+                } else if (typeof expr === 'string' && doly.matchesSelector(el, expr)) { // until
+                    result.pop();
+                    break;
+                }
+            }
+        }
+        return result;
+    };
+	
+	doly.each({
+	    parent: function(el) {
+            var parent = el.parentNode;
+            return parent && parent.nodeType !== 11 ? parent: [];
+        },
+        parents: function(el) {
+            return travel(el, 'parentNode').reverse();
+        },
+        parentsUntil: function(el ,expr) {
+            return travel(el, 'parentNode', expr).reverse();
+        },
+        next: function(el) {
+            return travel(el, 'nextSibling', true);
+        },
+        nextAll: function(el) {
+            return travel(el, 'nextSibling');
+        },
+        nextUntil: function(el, expr) {
+            return travel(el, 'nextSibling', expr);
+        },
+        prev: function(el) {
+            return travel(el, 'previousSibling', true);
+        },
+        prevAll: function(el) {
+            return travel(el, 'previousSibling').reverse();
+        },
+        prevUntil: function(el, expr) {
+            return travel(el, 'previousSibling', expr).reverse();
+        },
+        children: function(el) {
+            return el.children ? doly.slice(el.children) :
+            doly.slice(el.childNodes).filter(function(node) {
+                return node.nodeType === 1;
+            });
+        },
+        siblings: function(el) {
+            return travel(el, 'previousSibling').reverse().concat(travel(el, 'nextSibling'));
+        },
+        contents: function(el) {
+            return el.tagName === 'IFRAME' ?
+            el.contentDocument || el.contentWindow.document :
+            doly.slice(el.childNodes);
+        }
+	}, function(method, name) {
+	    dolyPt[name] = function(until, selector) {
+		    init.call(this);
+			var nodes = [], i = 0, el;
+            for ( ; el = this[i++]; ) {
+                nodes = nodes.concat(method(el, until));
+            }
+            if (!/Until/.test(name)) {
+                selector = until;
+            }
+			if (selector && typeof selector === 'string') {
+			    nodes = doly.filterEle(selector, nodes);
+			}
+            nodes = this.length > 1 && !uniqOne[name] ? doly.unique(nodes) : nodes;
+            return this.pushStack(nodes);
+		};
+	});
+	
     return node;
 });

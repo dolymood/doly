@@ -14,7 +14,7 @@ define('query', ['$sizzle'], function(Sizzle) {
         unique: Sizzle.uniqueSort,
         matches: Sizzle.matches,
         isXMLDoc: Sizzle.isXML,
-        eleContains: Sizzle.contains,
+        containsEle: Sizzle.contains,
         matchesSelector: Sizzle.matchesSelector
         
     };

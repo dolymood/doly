@@ -118,7 +118,7 @@
          * @param {Object} 一个或多个对象
          * @return {Object} 合并后的新对象
          */
-        merge: function() {
+        mergeObj: function() {
             var result = {}, i = 0, len = arguments.length;
             for ( ; i < len ; i++) {
                 mix(result, arguments[i]);
@@ -131,7 +131,7 @@
          * @param {Object} 一个或多个对象
          * @return {Object} 合并后的新对象
          */
-        deepMerge: function() {
+        deepMergeObj: function() {
             var result = {}, i = 0, len = arguments.length;
             for ( ; i < len ; i++) {
                 mix(result, doly.deepClone(arguments[i]));
@@ -662,6 +662,7 @@
         }
         
     });
+	doly.prototype.doly_ = 'doly'; //用于标示doly实例
     module.update('ready', STATUS.loading);
     doly.require('$DOMReady', function() {
         doly.ready(function() {

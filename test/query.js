@@ -14,7 +14,7 @@ $(function() {
 			ok(_$.matchesSelector(stop_button, '#stop_button'));
 			ok(_$.matches('#qunit', qunit));
 			equal(_$.text(stop_button), 'Stop Tests');
-			ok(_$.eleContains(_$.find('body')[0], _$.find('#id1')[0]));
+			ok(_$.containsEle(_$.find('body')[0], _$.find('#id1')[0]));
 			start();
 		});
 	});

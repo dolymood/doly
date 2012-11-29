@@ -12,6 +12,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         slice          = doly.slice,
         breaker        = {},
         toString       = Op.toString,
+		nativeIndexOf  = Ap.indexOf,
         hasOwnProperty = Op.hasOwnProperty,
         // 链式调用
         result = function(obj) {
@@ -106,7 +107,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
                 return array[i] === item ? i : -1;
             }
         }
-        if (array.indexOf === Ap.indexOf) return array.indexOf(item, isSorted);
+        if (array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
         for (; i < len; i++) if (array[i] === item) return i;
         return -1;
     };
@@ -166,6 +167,13 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
     };
     
     lang.isArray = Array.isArray;
+
+	lang.inArray = function(elem, ary, i) {
+		if (arr) {
+		    return nativeIndexOf.call(arr, elem, i);
+		}
+		return -1;
+	};
     
     lang.isWindow = function(obj) {
         return obj && obj == obj.window;
@@ -182,6 +190,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         throw new Error(msg);
     };
     
+	// 数组或者类数组的merge
 	lang.merge = function(first, second) {
 	    var l = second.length,
 			i = first.length,
