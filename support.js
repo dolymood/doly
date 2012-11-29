@@ -98,7 +98,7 @@ define('support', function() {
         reliableMarginRight: true,
         boxSizingReliable: true,
         pixelPosition: false,
-		insertAdjacentHTML: false
+        insertAdjacentHTML: false
     };
 
     // Make sure checked status is properly cloned
@@ -176,14 +176,14 @@ define('support', function() {
         }
     }
     
-	var table = div.getElementsByTagName("table")[0];
+    var table = div.getElementsByTagName("table")[0];
     try {//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
         table.innerHTML = "<tr><td>1</td></tr>";
         support.innerHTML = true;
         table.insertAdjacentHTML( "afterBegin", "<tr><td>2</td></tr>" );
         support.insertAdjacentHTML = true;
     } catch( e ) { };
-	
+    
     // Run tests that need a body at doc ready
     doly.require('ready', function() {
         var container, div, tds, marginDiv,
@@ -194,7 +194,7 @@ define('support', function() {
             // Return for frameset docs that don't have a body
             return;
         }
-		try {
+        try {
             var range = document.createRange();
             range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
             support.fastFragment = !!range.createContextualFragment("<a>");
