@@ -12,7 +12,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         slice          = doly.slice,
         breaker        = {},
         toString       = Op.toString,
-		nativeIndexOf  = Ap.indexOf,
+        nativeIndexOf  = Ap.indexOf,
         hasOwnProperty = Op.hasOwnProperty,
         // 链式调用
         result = function(obj) {
@@ -74,16 +74,16 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         });
         return results;
     };
-	
-	lang.filter = function(obj, callback, context) {
-	    var results = [];
-		each(obj, function(value, index, list) {
-		    if (callback.call(context, value, index, list)) {
-			    results.push(value);
-			}
-		});
-		return results;
-	};
+    
+    lang.filter = function(obj, callback, context) {
+        var results = [];
+        each(obj, function(value, index, list) {
+            if (callback.call(context, value, index, list)) {
+                results.push(value);
+            }
+        });
+        return results;
+    };
     
     lang.sortedIndex = function(array, obj, iterator, context) {
         iterator = iterator || doly.identity;
@@ -168,12 +168,12 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
     
     lang.isArray = Array.isArray;
 
-	lang.inArray = function(elem, ary, i) {
-		if (arr) {
-		    return nativeIndexOf.call(arr, elem, i);
-		}
-		return -1;
-	};
+    lang.inArray = function(elem, ary, i) {
+        if (arr) {
+            return nativeIndexOf.call(arr, elem, i);
+        }
+        return -1;
+    };
     
     lang.isWindow = function(obj) {
         return obj && obj == obj.window;
@@ -190,44 +190,44 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         throw new Error(msg);
     };
     
-	// 数组或者类数组的merge
-	lang.merge = function(first, second) {
-	    var l = second.length,
-			i = first.length,
-			j = 0;
+    // 数组或者类数组的merge
+    lang.merge = function(first, second) {
+        var l = second.length,
+            i = first.length,
+            j = 0;
 
-		if (typeof l === 'number') {
-			for (; j < l; j++) {
-				first[i++] = second[j];
-			}
-		} else {
-			while (second[j] !== void 0) {
-				first[i++] = second[j++];
-			}
-		}
-		first.length = i;
-		return first;
-	};
-	
-	// 数组或者类数组的深度合并
-	lang.deepMerge = function(first, second) {
-	    var l = second.length,
-			i = first.length,
-			j = 0;
+        if (typeof l === 'number') {
+            for (; j < l; j++) {
+                first[i++] = second[j];
+            }
+        } else {
+            while (second[j] !== void 0) {
+                first[i++] = second[j++];
+            }
+        }
+        first.length = i;
+        return first;
+    };
+    
+    // 数组或者类数组的深度合并
+    lang.deepMerge = function(first, second) {
+        var l = second.length,
+            i = first.length,
+            j = 0;
 
-		if (typeof l === 'number') {
-			for (; j < l; j++) {
-				first[i++] = doly.deepClone(second[j]);
-			}
-		} else {
-			while (second[j] !== void 0) {
-				first[i++] = doly.deepClone(second[j++]);
-			}
-		}
-		first.length = i;
-		return first;
-	};
-	
+        if (typeof l === 'number') {
+            for (; j < l; j++) {
+                first[i++] = doly.deepClone(second[j]);
+            }
+        } else {
+            while (second[j] !== void 0) {
+                first[i++] = doly.deepClone(second[j++]);
+            }
+        }
+        first.length = i;
+        return first;
+    };
+    
     lang.makeArray = function(obj) {
         if (obj == null) {
             return [];
@@ -281,7 +281,7 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
         }
         return xml;
     };
-	
+    
     lang.parseJSON = function(data) {
         if (!data || typeof data != 'string') return null;
         data = data.trim();

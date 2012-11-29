@@ -148,7 +148,7 @@
             var obj, key, i, len;
             if (typeof k === 'string') {
                 target[key] = doly.deepClone(v);
-				return target;
+                return target;
             }
             for (i = 1, len = arguments.length; i < len; i++) {
                 mix(target, doly.deepClone(arguments[i]));
@@ -663,7 +663,7 @@
         }
         
     });
-	doly.prototype.doly_ = 'doly'; //用于标示doly实例
+    doly.prototype.doly_ = 'doly'; //用于标示doly实例
     module.update('ready', STATUS.loading);
     doly.require('$DOMReady', function() {
         doly.ready(function() {

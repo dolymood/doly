@@ -6,7 +6,7 @@ define('query', ['$sizzle'], function(Sizzle) {
     'use strict';
 
     var
-	query = {
+    query = {
         
         find: Sizzle,
         text: Sizzle.getText,
