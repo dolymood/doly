@@ -207,41 +207,41 @@ define('node', ['$support', '$data', '$query'], function(support) {
         },
         
         clone: function(dataAndEvents, deepDataAndEvents) {
-			dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
+            dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
             return this.mapEle(function () {
                 return cloneNode(this, dataAndEvents, deepDataAndEvents);
             });
         },
-		
-		has: function(selector) {
-		    init.call(this);
-			var elems = init.call(doly(selector, this)),
-			    len = elems.length, i;
-			return this.filterEle(function() {
-			    for (i = 0; i < len; i++) {
-					if (doly.containsEle(this, elems[i])) {
-						return true;
-					}
-				}
-			});
-		},
-		
-		not: function(selector) {
-			init.call(this);
-			return this.pushStack(winnow(this, selector, true));
-		},
+        
+        has: function(selector) {
+            init.call(this);
+            var elems = init.call(doly(selector, this)),
+                len = elems.length, i;
+            return this.filterEle(function() {
+                for (i = 0; i < len; i++) {
+                    if (doly.containsEle(this, elems[i])) {
+                        return true;
+                    }
+                }
+            });
+        },
+        
+        not: function(selector) {
+            init.call(this);
+            return this.pushStack(winnow(this, selector, true));
+        },
 
-		filterEle: function(selector) {
-			init.call(this);
-			return this.pushStack(winnow(this, selector, false));
-		},
-		
-		is: function(selector) {
-		    init.call(this);
-			var elems = doly.find(selector),
-			    i = 0,
-				obj = {}, uid, node;
+        filterEle: function(selector) {
+            init.call(this);
+            return this.pushStack(winnow(this, selector, false));
+        },
+        
+        is: function(selector) {
+            init.call(this);
+            var elems = doly.find(selector),
+                i = 0,
+                obj = {}, uid, node;
             for ( ; node = elems[i++]; ) {
                 uid = doly.getUID(node);
                 obj[uid] = 1;
@@ -249,13 +249,13 @@ define('node', ['$support', '$data', '$query'], function(support) {
             return doly.slice(this).some(function(el) {
                 return obj[doly.getUID(el)];
             });
-		},
-		
-		closest: function(selectors, context) {
-		    init.call(this);
-			var elems = init.call(doly(selectors, context || this.ownerDocument)),
-			    i = 0, ret = [], cur;
-			for ( ; cur = this[i++]; ) {
+        },
+        
+        closest: function(selectors, context) {
+            init.call(this);
+            var elems = init.call(doly(selectors, context || this.ownerDocument)),
+                i = 0, ret = [], cur;
+            for ( ; cur = this[i++]; ) {
                 while (cur) {
                     if (doly.inArray(cur, elems) > -1) {
                         ret.push(cur);
@@ -270,20 +270,20 @@ define('node', ['$support', '$data', '$query'], function(support) {
             }
             ret = ret.length > 1 ? doly.unique(ret) : ret;
             return this.pushStack(ret);
-		},
+        },
         
-		index: function(elem) {
-		    init.call(this);
-			var first = this[0];
+        index: function(elem) {
+            init.call(this);
+            var first = this[0];
             if (!elem) { //如果没有参数，返回第一元素位于其兄弟的位置
                 return (first && first.parentNode) ? this.first().prevAll().length : -1;
             }
             // 返回第一个元素在新实例中的位置
             if (typeof elem === 'string') {
-				return doly.inArray(this[0], init.call(doly(elem)));
+                return doly.inArray(this[0], init.call(doly(elem)));
             }
             return doly.inArray(elem.doly_ ? (elem.__hasInit__ ? elem[0] : init.call(elem)[0]) : elem, this);
-		}
+        }
     };
     
     var rtag = /^[a-zA-Z]+$/;
@@ -302,15 +302,15 @@ define('node', ['$support', '$data', '$query'], function(support) {
             expr = expr[0]; // selector|expr
             if (!context.nodeType) { // 如果context不是元素
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-				if (!(context.find && context.find === this.find)) { // context 不是doly实例化对象
-				    context = new doly(context); // 实例化之
-				}
+                if (!(context.find && context.find === this.find)) { // context 不是doly实例化对象
+                    context = new doly(context); // 实例化之
+                }
                 _wrapped = this._wrapped = context.find(expr)._wrapped; // 根据context查找expr，得到结果
                 this.length || (this.length = 0);
                 return doly.merge(this, _wrapped); // 将结果合并到this上
             }
         }
-		
+        
         if (expr.nodeType) { // 元素 直接返回即可
             this.context = this[0] = expr;
             this.length = 1;
@@ -334,29 +334,29 @@ define('node', ['$support', '$data', '$query'], function(support) {
             return doly.merge(this, _wrapped);
         } else {//分支8：处理数组，节点集合或者doly对象(doly(expr))或window对象
             if (expr.doly_ && !expr.__hasInit__) { // doly(selector)
-			    init.apply(expr);
-			}
-			this.ownerDocument = getDoc(expr[0]);
+                init.apply(expr);
+            }
+            this.ownerDocument = getDoc(expr[0]);
             _wrapped = this._wrapped = doly.isArrayLike(expr) ?  expr : [expr];
             this.length || (this.length = 0);
             doly.merge(this, _wrapped);
             delete this.selector;
-			return this;
+            return this;
         } 
     }
-	
+    
     // filterEle and not(^异或)
-	function winnow(elems, selector, not) {
-	    var ret = [], doc = elems.ownerDocument;
-		elems = elems._wrapped;
-		if (!doly.isArray(elems)) {
-		    elems = doly.slice(elems);
-		}
+    function winnow(elems, selector, not) {
+        var ret = [], doc = elems.ownerDocument;
+        elems = elems._wrapped;
+        if (!doly.isArray(elems)) {
+            elems = doly.slice(elems);
+        }
         if (typeof selector === 'string') {
             var fits = doly.find(selector, doc);
             elems.forEach(function(node) {
                 if (node.nodeType === 1) {
-					if ((fits.indexOf(node) !== -1) ^ not) {
+                    if ((fits.indexOf(node) !== -1) ^ not) {
                         ret.push(node);
                     }
                 }
@@ -371,8 +371,8 @@ define('node', ['$support', '$data', '$query'], function(support) {
             });
         }
         return ret;
-	}
-	
+    }
+    
     function getDoc(){
         for (var i = 0, len = arguments.length, el; i < len; i++) {
             if (el = arguments[i]) {
@@ -748,8 +748,8 @@ define('node', ['$support', '$data', '$query'], function(support) {
             return this;
         }
     });
-	
-	var uniqOne = doly.oneObject(['children', 'contents', 'next', 'prev']);
+    
+    var uniqOne = doly.oneObject(['children', 'contents', 'next', 'prev']);
     function travel(el, prop, expr) {
         var result = [], i = 0;
         while ((el = el[prop])) {
@@ -765,9 +765,9 @@ define('node', ['$support', '$data', '$query'], function(support) {
         }
         return result;
     };
-	
-	doly.each({
-	    parent: function(el) {
+    
+    doly.each({
+        parent: function(el) {
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
         },
@@ -809,23 +809,23 @@ define('node', ['$support', '$data', '$query'], function(support) {
             el.contentDocument || el.contentWindow.document :
             doly.slice(el.childNodes);
         }
-	}, function(method, name) {
-	    dolyPt[name] = function(until, selector) {
-		    init.call(this);
-			var nodes = [], i = 0, el;
+    }, function(method, name) {
+        dolyPt[name] = function(until, selector) {
+            init.call(this);
+            var nodes = [], i = 0, el;
             for ( ; el = this[i++]; ) {
                 nodes = nodes.concat(method(el, until));
             }
             if (!/Until/.test(name)) {
                 selector = until;
             }
-			if (selector && typeof selector === 'string') {
-			    nodes = doly.filterEle(selector, nodes);
-			}
+            if (selector && typeof selector === 'string') {
+                nodes = doly.filterEle(selector, nodes);
+            }
             nodes = this.length > 1 && !uniqOne[name] ? doly.unique(nodes) : nodes;
             return this.pushStack(nodes);
-		};
-	});
-	
+        };
+    });
+    
     return node;
 });
