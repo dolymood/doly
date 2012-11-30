@@ -85,6 +85,11 @@ define('node', ['$support', '$data', '$query'], function(support) {
             }));
         },
         
+        end: function() {
+            init.call(this);
+            return this.prevObject || init.call(new doly());
+        },
+        
         eq: function(i) {
             return (i = +i) === -1 ? this.sliceEle(i) : this.sliceEle(i, i + 1);
         },
@@ -158,7 +163,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 } else if (el.tagName == 'OPTION' || el.tagName == 'SCRIPT') {
                     return el.text;
                 }
-                return el.textContent || el.innerText || doly.getText([el]);
+                return el.textContent || el.innerText || doly.text([el]);
             }, function() {
                 this.empty().append((this.ownerDocument || document).createTextNode(item));
             }, this);
@@ -283,12 +288,16 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 return doly.inArray(this[0], init.call(doly(elem)));
             }
             return doly.inArray(elem.doly_ ? (elem.__hasInit__ ? elem[0] : init.call(elem)[0]) : elem, this);
-        }
+        },
+		
+		init: init
     };
     
-    var rtag = /^[a-zA-Z]+$/;
+    var rtag = /^[a-zA-Z]+$/,
+        rquickExpr = /#([\w\-]*)$/;
     function init() {
-        if (this.__hasInit__) return this; // 已经初始化过了
+        debugger;
+		if (this.__hasInit__) return this; // 已经初始化过了
         var expr = this._wrapped, _wrapped, doc, context, nodes; //用作节点搜索的起点
         this.__hasInit__ = true; // 设置已经初始化参数
         if (!expr) { // 没有参数的情况 直接返回
@@ -321,18 +330,26 @@ define('node', ['$support', '$data', '$query'], function(support) {
         if (typeof expr === 'string') { // 是字符串
             doc = this.ownerDocument = !context ? document : getDoc(context, context[0]);
             var scope = context || doc;
-            if (expr.charAt(0) === '<' && expr.charAt(expr.length - 1) === '>' && expr.length >= 3) {
-                nodes = doly.parseHTML(expr, doc);//分支5: 动态生成新节点
+            if (expr.charAt(0) === '<' && expr.charAt(expr.length - 1) === '>' && expr.length >= 3) { // html字符串
+                nodes = doly.parseHTML(expr, doc); // 生成新节点
                 nodes = nodes.childNodes;
-            } else if (rtag.test(expr)) {//分支6: getElementsByTagName
+            } else if (rtag.test(expr)) { // getElementsByTagName
                 nodes = scope.getElementsByTagName(expr);
-            } else {//分支7：进入选择器模块
-                nodes  = doly.find(expr, scope);
+            } else if (rquickExpr.test(expr)) { // #aa ID
+                nodes = document.getElementById(RegExp.$1);
+                if (nodes && nodes.parentNode) {
+                    if (nodes.id !== RegExp.$1) { // id|name IE Opera
+                        nodes = doly.find(expr, scope); // 重新查找
+                    }
+                }
+				doly.isArray(nodes) || (nodes = [nodes]);
+            } else { // 进入选择器 
+                nodes = doly.find(expr, scope);
             }
             _wrapped = this._wrapped = doly.slice(nodes);
             this.length || (this.length = 0);
             return doly.merge(this, _wrapped);
-        } else {//分支8：处理数组，节点集合或者doly对象(doly(expr))或window对象
+        } else { // 处理数组，节点集合或者doly对象(doly(expr))或window对象
             if (expr.doly_ && !expr.__hasInit__) { // doly(selector) 是doly实例 但是没有init
                 init.apply(expr);
             }
@@ -340,7 +357,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
             _wrapped = this._wrapped = doly.isArrayLike(expr) ?  expr : [expr];
             this.length || (this.length = 0);
             doly.merge(this, _wrapped);
-            delete this.selector;
+            delete this.selector; // 删除selector 此时selector没意义
             return this;
         } 
     }
@@ -726,6 +743,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
                 doly.find.matches(expr, elems);
         }
     });
+	doly.init = init;
     var dolyPt = doly.prototype;
     doly.mix(dolyPt, node);
     doly.mix(dolyPt, { // 实现data和removeData

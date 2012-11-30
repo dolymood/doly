@@ -664,6 +664,7 @@
         
     });
     doly.prototype.doly_ = 'doly'; //用于标示doly实例
+	doly.prototype.constructor = doly;
     module.update('ready', STATUS.loading);
     doly.require('$DOMReady', function() {
         doly.ready(function() {
