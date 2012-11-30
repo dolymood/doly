@@ -97,7 +97,7 @@
         return this._chain ? doly(obj).chain() : obj;
     };
     
-    window._$ = window.doly = doly;
+    window._$ = window.D = window.doly = doly;
     
     mix(doly, {
         mix: mix,
