@@ -4,4 +4,10 @@
 
 define('css', ['$node'], function() {
     
+	var init = doly.init;
+	
+	doly.mix(doly.prototype, {
+	        
+	});
+	
 });

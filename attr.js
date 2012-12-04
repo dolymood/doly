@@ -3,5 +3,32 @@
  */
 
 define('attr', ['$node'], function() {
-    
+    var init = doly.init;
+	
+	doly.mix(doly.prototype, {
+	    
+		attr: function() {
+		    
+		},
+		
+		removeAttr: function() {
+		    
+		},
+		
+		prop: function() {
+		    
+		},
+		
+		removeProp: function() {
+		    
+		}
+		
+	});
+	
+	doly.mix(doly, {
+	    attr: function() {
+		    
+		}
+	});
+	
 });
