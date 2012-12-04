@@ -442,7 +442,7 @@
                 'doly.define = ', innerDefine, ';',
                 'var define = doly.define;',
             '<\/script>',
-            '<script src="', url + '?ts=' + Date.now(),'" ',
+            '<script src="', url + ''/*'?ts=' + Date.now()*/,'" ',
             (charset ? ('charset="' + charset + '" '): ''),
             (document.uniqueID ? 'onreadystatechange="' : 'onload="'),
                 'if(/loaded|complete|undefined/i.test(this.readyState)){',

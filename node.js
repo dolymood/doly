@@ -72,7 +72,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
         
         eachEle: function(callback) {
             init.call(this);
-            doly.each(function(item, index, ary) {
+            doly.each(this, function(item, index, ary) {
                 return callback.call(item);
             });
             return this;
@@ -158,12 +158,13 @@ define('node', ['$support', '$data', '$query'], function(support) {
         text: function(item) {
             init.call(this);
             return doly.access(this, 0, item, function(el) {
-                if (!el) {
-                    return '';
-                } else if (el.tagName == 'OPTION' || el.tagName == 'SCRIPT') {
-                    return el.text;
-                }
-                return el.textContent || el.innerText || doly.text([el]);
+                // if (!el) {
+                    // return '';
+                // } else if (el.tagName == 'OPTION' || el.tagName == 'SCRIPT') {
+                    // return el.text;
+                // }
+                // return el.textContent || el.innerText || doly.text([el]);
+				return doly.text(this._wrapped);
             }, function() {
                 this.empty().append((this.ownerDocument || document).createTextNode(item));
             }, this);
@@ -296,7 +297,6 @@ define('node', ['$support', '$data', '$query'], function(support) {
     var rtag = /^[a-zA-Z]+$/,
         rquickExpr = /#([\w\-]*)$/;
     function init() {
-        debugger;
 		if (this.__hasInit__) return this; // 已经初始化过了
         var expr = this._wrapped, _wrapped, doc, context, nodes; //用作节点搜索的起点
         this.__hasInit__ = true; // 设置已经初始化参数
@@ -706,7 +706,7 @@ define('node', ['$support', '$data', '$query'], function(support) {
         // 用于统一配置多态方法的读写访问
         access: function(elems, key, value, getter, setter, scope) {
             var length = elems.length, k, i;
-            setter = typeof setter === 'function' ? setter : getter;
+            setter = typeof setter === 'function' ? setter : getter; // 传进来的函数具备了setter&getter的能力
             scope = arguments[arguments.length - 1];
             if (typeof key === 'object') {
                 for (k in key) { // 设置所有的元素设置属性
@@ -747,16 +747,16 @@ define('node', ['$support', '$data', '$query'], function(support) {
     var dolyPt = doly.prototype;
     doly.mix(dolyPt, node);
     doly.mix(dolyPt, { // 实现data和removeData
-        data: function(key, item, pv) {
+        data: function(key, item) {
             init.call(this);
             return doly.access(this, key, item, function(el){
-                return doly.data(el, key, item,  pv === true);
+                return doly.data(el, key, item);
             });
         },
         removeData: function(key, pv) {
             init.call(this);
             return this.each(function() {
-                doly.removeData(this, key, pv);
+                doly.removeData(this, key);
             });
         }
     });
