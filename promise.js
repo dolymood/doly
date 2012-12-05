@@ -53,8 +53,9 @@ define('promise', ['$class'], function() {
 		    var data = promiseCache[this.uid],
 			    isAllResolved = true,
 				list, resolveArgs, resolves;
-			if (data) {
+			if (data) {			    
 			    this.state = RESOLVED;
+				if (this._ret) this._ret.state = RESOLVED;
 				resolveArgs = data.resolveArgs;
 				resolveArgs || (resolveArgs = data.resolveArgs = []);
 				list = data.list;
@@ -62,7 +63,7 @@ define('promise', ['$class'], function() {
 				    if (ps.state !== RESOLVED) {
 						isAllResolved = false;
 					}
-					if (ps === this) {
+					if (ps === this || ps._promise === this) {
 					    resolveArgs[i] = arg;
 					}
 				}, this);
@@ -91,9 +92,13 @@ define('promise', ['$class'], function() {
 					    isRejected = true;
 					} else {
 					    ps.state = REJECTED;
+						if (ps._ret) ps._ret.state = RESOLVED;
 					}
-					if (ps === this) {
+					if (ps === this || ps._promise === this) {
 					    rejectArgs[i] = arg;
+						if (this.state !== REJECTED) {
+						    if (this._promise) this._promise.state = RESOLVED;
+						}
 					}
 				}, this);
 				rejects = data.rejects;
@@ -231,8 +236,9 @@ define('promise', ['$class'], function() {
 				
 				uid: self.uid
 			};
-			this._promise = ret;
-			return this._promise;
+			ret._promise = this;
+			this._ret = ret;
+			return ret;
 		},
 		
 		// 手动销毁

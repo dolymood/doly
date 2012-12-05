@@ -15,21 +15,21 @@ $(function() {
 			    var df = doly.defer();
 				setTimeout(function() {
 				    df.reject('reject2');
-				}, 2000);
+				}, 4000);
 				return df.promise();
 			};
 			var fuc3 = function() {
 			    var df = doly.defer();
 				setTimeout(function() {
 				    df.resolve('resolved3');
-				}, 3000);
+				}, 8000);
 				return df.promise();
 			};
 			var fuc4 = function() {
 			    var df = doly.defer();
 				setTimeout(function() {
 				    df.reject('reject4');
-				}, 4000);
+				}, 12000);
 				return df.promise();
 			};
 			fuc1().done(function(ret) {
@@ -76,6 +76,11 @@ $(function() {
 			var d2 = fuc2();
 			var d3 = fuc3();
 			var d4 = fuc4();
+			doly.when(d1, d3).then(function(r1, r2) {
+			    doly.log('d1, d2:' + r1 + '+' + r2);
+			}, function(r1, r2) {
+			    doly.log('d1, d2:fail:' + r1 + '+' + r2);
+			});
 			doly.when(d1, d2, d3, d4).then(function(r1, r2, r3, r4) {
 			    doly.log('d1, d2, d3, d4:' + r1 + '+' + r2 + '+' + r3 + '+' + r4);
 			}, function(r1, r2, r3, r4) {
