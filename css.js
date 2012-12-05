@@ -3,7 +3,8 @@
  */
 
 define('css', ['$node'], function() {
-    
+    'use strict';
+	
 	var init = doly.init;
 	
 	doly.mix(doly.prototype, {

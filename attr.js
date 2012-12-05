@@ -3,7 +3,9 @@
  */
 
 define('attr', ['$node'], function() {
-    var init = doly.init;
+    'use strict';
+	
+	var init = doly.init;
 	
 	doly.mix(doly.prototype, {
 	    
