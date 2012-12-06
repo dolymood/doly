@@ -247,8 +247,14 @@
                 if (end < 0) {
                     end += n;
                 }
-                for (i = start; i < end; i++) {
-                    ret[i - start] = nodes[i];
+                if (typeof nodes === 'string') {
+                    for (i = start; i < end; i++) {
+                        ret[i - start] = nodes.charAt(i);
+                    }
+                } else {
+                    for (i = start; i < end; i++) {
+                        ret[i - start] = nodes[i];
+                    }
                 }
             }
             return ret;
@@ -664,7 +670,7 @@
         
     });
     doly.prototype.doly_ = 'doly'; //用于标示doly实例
-	doly.prototype.constructor = doly;
+    doly.prototype.constructor = doly;
     module.update('ready', STATUS.loading);
     doly.require('$DOMReady', function() {
         doly.ready(function() {

@@ -42,7 +42,7 @@ define('promise', ['$class'], function() {
             bth[rnds[i++]] + bth[rnds[i++]];
         },
         Promise;
-    doly.promiseCache = promiseCache;
+
     doly.when = function() {
         return new Promise(doly.slice(arguments));
     };
@@ -143,7 +143,7 @@ define('promise', ['$class'], function() {
                 // 确保失败回调执行 并且只执行一次
                 if ((!isRejected || !this.isRejected) && rejects) {
                     rejects.forEach(function(rj) {
-                        rj.apply(null, rejectArgs);
+                        rj.apply(window, rejectArgs);
                     });
                     each(data, function(val, key) {
                         this[key] = val = null;
@@ -243,32 +243,9 @@ define('promise', ['$class'], function() {
                 }
             }
             return this;
-        },
-        
-        // 手动销毁
-        destory: function() {
-            var uid = this.uid,
-                cache = promiseCache[uid],
-                each = doly.each,
-                self = this;
-            // 延迟删除
-            setTimeout(function() {
-                if (cache) {
-                    each(cache, function(val, key) {
-                        this[key] = val = null;
-                        delete this[key];
-                    }, cache);
-                    promiseCache[uid] = null;
-                    delete promiseCache[uid];
-                }
-                each(this, function(val, key) {
-                    this[key] = val = null;
-                    delete this[key];
-                }, self);
-            }, 0);
         }
         
     });
-    
+    doly.Promise = Promise;
     return Promise;
 });

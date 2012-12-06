@@ -119,15 +119,7 @@ $(function() {
 			d4.fail(function(s1) {
 			    doly.log('14');
 			    equal('d4:fail:' + s1, 'd4:fail:reject4');
-				d1.destory();
-				d2.destory();
-				d3.destory();
-				d4.destory();
-				d5.destory();
-				d6.destory();
-				setTimeout(function() {
-				    start();
-				}, 10);
+				start();
 			});
 			d5.done(function(s1) {
 			    doly.log('15');
@@ -143,7 +135,7 @@ $(function() {
 			    doly.log('17');
 				equal('d1, d2, d3, d4:fail:' + r1 + '+' + r2 + '+' + r3 + '+' + r4, 'd1, d2, d3, d4:fail:undefined+reject2+undefined+undefined');
 			});
-			var a = doly.when(d1, d3).then(function(r1, r2) {
+			doly.when(d1, d3).then(function(r1, r2) {
 			    doly.log('18');
 			    equal('d1, d3:' + r1 + '+' + r2, 'd1, d3:resolved1+resolved3');
 			}, function(r1, r2) {
