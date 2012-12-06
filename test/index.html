@@ -9,14 +9,21 @@
     <script src="vendor/jslitmus.js"></script>
     <script src="../doly.js"></script>
 	<script>
-	    _$.require('ready', function() {
-			_$.log('dom content ready');
-		});
-		 _$.require('ready', function() {
-			_$.log('dom content ready1');
-		});
-		 _$.require('ready', function() {
-			_$.log('dom content ready2');
+	    module('ready');
+		asyncTest('ready', function() {
+		    _$.require('ready', function() {
+				_$.log('dom content ready');
+				ok('done1');
+			});
+			 _$.require('ready', function() {
+				_$.log('dom content ready1');
+				ok('done2');
+			});
+			 _$.require('ready', function() {
+				_$.log('dom content ready2');
+				ok('done3');
+				start();
+			});
 		});
 	</script>
     <script src="base.js"></script>
