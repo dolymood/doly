@@ -9,8 +9,39 @@ define('promise', ['$class'], function() {
 	    PENDING = 1,
 		RESOLVED = 2,
 		REJECTED = 3,
+		_rnds = new Array(16),
+		_rng = function() {
+		    for (var i = 0, r; i < 16; i++) {
+			    if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+			    _rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+		    }
+		    return _rnds;
+		},
+		_byteToHex = (function() {
+		    var ret = [];
+			for (var i = 0; i < 256; i++) {
+				ret[i] = (i + 0x100).toString(16).substr(1);
+			}
+			return ret;
+		})(),
+		// https://github.com/broofa/node-uuid
+		uuid = function() {
+		    var i = 0,
+			    rnds = _rng(),
+			    bth = _byteToHex;
+			rnds[6] = (rnds[6] & 0x0f) | 0x40;
+            rnds[8] = (rnds[8] & 0x3f) | 0x80;
+			return bth[rnds[i++]] + bth[rnds[i++]] +
+            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+            bth[rnds[i++]] + bth[rnds[i++]] +
+            bth[rnds[i++]] + bth[rnds[i++]] +
+            bth[rnds[i++]] + bth[rnds[i++]];
+		},
 		Promise;
-	
+	doly.promiseCache = promiseCache;
 	doly.when = function() {
 	    return new Promise(doly.slice(arguments));
 	};
@@ -21,7 +52,7 @@ define('promise', ['$class'], function() {
 	Promise = doly.factory({
 	    
 		init: function(list) {
-		    var uid = doly.getUID(this),
+		    var uid = uuid(),
 			    obj = promiseCache[uid] = {};
 			list || (list = [this]);
 			list.forEach(function(ps, i, list) {
@@ -38,12 +69,16 @@ define('promise', ['$class'], function() {
 						obj.rejectArgs[i] = data.rejectArgs[0];
 					}
 				}
-				ps.uid = uid;
-				if (ps._promise) {
-				    ps._promise.uid = uid;
+				// 设置list中的每一个promise对象的uid为当前promise对象的uid
+				// 这样才能在需要的每一个promise对象的状态更改的时候都能够去
+				// 检测一次 是否能够执行成功或者失败的回调函数
+				if (ps !== this) {
+				    ps.references.push(this);
 				}
-			});
+			}, this);
 			obj.list = list;
+			// 所有的使用当前promise对象的promise对象uid集合
+			this.references = [];
 			this.uid = uid;
 		    this.state = PENDING;
 		},
@@ -53,9 +88,9 @@ define('promise', ['$class'], function() {
 		    var data = promiseCache[this.uid],
 			    isAllResolved = true,
 				list, resolveArgs, resolves;
-			if (data) {			    
+			if (data) {
 			    this.state = RESOLVED;
-				if (this._ret) this._ret.state = RESOLVED;
+				this.resolveArg = arg;
 				resolveArgs = data.resolveArgs;
 				resolveArgs || (resolveArgs = data.resolveArgs = []);
 				list = data.list;
@@ -63,9 +98,10 @@ define('promise', ['$class'], function() {
 				    if (ps.state !== RESOLVED) {
 						isAllResolved = false;
 					}
-					if (ps === this || ps._promise === this) {
-					    resolveArgs[i] = arg;
-					}
+					resolveArgs[i] = ps.resolveArg;
+					// if (ps === this) {
+					    // resolveArgs[i] = arg;
+					// }
 				}, this);
 				resolves = data.resolves;
 				if (isAllResolved && resolves) {
@@ -76,6 +112,9 @@ define('promise', ['$class'], function() {
 			} else {
 			    doly.error('promise.resolve error: not initialized');
 			}
+			this.references.forEach(function(ps) {
+			    ps.resolve(ps.resolveArg);
+			});
 		},
 		
 		// 已拒绝
@@ -83,33 +122,36 @@ define('promise', ['$class'], function() {
 		    var data = promiseCache[this.uid],
 			    isRejected = false,
 				list, rejectArgs, rejects;
+			// 确保只执行一次的失败处理函数
+			if (this.isRejected) return false;
 			if (data) {
 			    list = data.list;
+				this.rejectArg = arg;
 				rejectArgs = data.rejectArgs;
 				rejectArgs || (rejectArgs = data.rejectArgs = []);
 				list.forEach(function(ps, i) {
 				    if (ps.state === REJECTED) {
 					    isRejected = true;
-					} else {
-					    ps.state = REJECTED;
-						if (ps._ret) ps._ret.state = RESOLVED;
 					}
-					if (ps === this || ps._promise === this) {
-					    rejectArgs[i] = arg;
-						if (this.state !== REJECTED) {
-						    if (this._promise) this._promise.state = RESOLVED;
-						}
+					rejectArgs[i] = ps.rejectArg;
+					if (ps === this) {
+						this.state = REJECTED;
 					}
 				}, this);
 				rejects = data.rejects;
-				if (!isRejected && rejects) {
+				// 确保失败回调执行 并且只执行一次
+				if ((!isRejected || !this.isRejected) && rejects) {
 				    rejects.forEach(function(rj) {
 					    rj.apply(null, rejectArgs);
 					});
+					this.isRejected = true; // 已经执行过已拒绝的处理函数
 				}
 			} else {
 			    doly.error('promise.reject error: not initialized');
 			}
+			this.references.forEach(function(ps) {
+			    ps.reject(ps.rejectArg);
+			});
 		},
 		
 		// 添加已完成和已拒绝的回调函数
@@ -205,52 +247,25 @@ define('promise', ['$class'], function() {
 			return this;
 		},
 		
-		promise: function() {
-		    var self = this, ret;
-			ret = {
-			    then: function(resolvedHandler, rejectedHandler) {
-				    self.then(resolvedHandler, rejectedHandler);
-					return this;
-				},
-				
-				done: function(resolvedHandler) {
-				    self.done(resolvedHandler);
-					return this;
-				},
-				
-				fail: function(rejectedHandler) {
-				    self.fail(rejectedHandler);
-					return this;
-				},
-				
-				state: self.state,
-				
-				destory: function() {
-				    this.each(function(val, key, cache) {
-					    cache[key] = null;
-				        delete cache[key];
-					});
-					self.destory();
-					this = null;
-				},
-				
-				uid: self.uid
-			};
-			ret._promise = this;
-			this._ret = ret;
-			return ret;
-		},
-		
 		// 手动销毁
 		destory: function() {
 		    var uid = this.uid,
-			    cache = promiseCache[uid];
-			cache.each(function(val, key, cache) {
-			    cache[key] = null;
-				delete cache[key];
-			});
-			promiseCache[uid] = null;
-			delete promiseCache[uid];
+			    cache = promiseCache[uid],
+				each = doly.each,
+				self = this;
+			// 延迟删除
+			setTimeout(function() {
+				each(cache, function(val, key) {
+					this[key] = val = null;
+					delete this[key];
+				}, cache);
+				promiseCache[uid] = null;
+				delete promiseCache[uid];
+				each(this, function(val, key) {
+					this[key] = val = null;
+					delete this[key];
+				}, self);
+			}, 0);
 		}
 		
 	});
