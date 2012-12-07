@@ -2,7 +2,7 @@
  * module class
  */
 
-define('class', ['$lang'], function() {
+define('class', ['$lang'], function(doly) {
     'use strict';
     
     var
@@ -103,5 +103,5 @@ define('class', ['$lang'], function() {
     doly.Class = Class;
     doly.factory = Class.create;
     doly.implement = implement;
-    return Class;
+    return doly;
 });

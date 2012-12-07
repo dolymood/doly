@@ -21,5 +21,5 @@ define('query', ['$sizzle'], function(Sizzle) {
     
     query.expr[':'] = query.expr.pseudos;
     doly.mix(doly, query);
-    return query;
+    return doly;
 });

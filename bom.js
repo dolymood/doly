@@ -48,10 +48,12 @@ define('bom', function() {
             }
         },
         
+		_bom_info: null,
+		
         // 浏览器信息
         client: function client() {
-            if (client._info) {
-                return client._info;
+            if (doly._bom_info) {
+                return doly._bom_info;
             }
             //rendering engines
             var engine = {            
@@ -259,10 +261,10 @@ define('bom', function() {
                 system:     system,
                 name:       name                
             };
-            client._info = ret;
+            doly._bom_info = ret;
             return ret;
         }
     };
 	doly.mix(doly, bom);
-    return bom;
+    return doly;
 });

@@ -64,5 +64,5 @@ define('DOMReady', function() {
     doly.prototype.ready = function() {
 		doly.ready(arguments[arguments.length - 1]);
     };
-    return doly.ready;
+    return doly;
 });

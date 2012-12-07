@@ -2,7 +2,7 @@
  * module attr 属性操作
  */
 
-define('attr', ['$node'], function() {
+define('attr', ['$node'], function(doly) {
     'use strict';
 	
 	var init = doly.init;
@@ -33,4 +33,5 @@ define('attr', ['$node'], function() {
 		}
 	});
 	
+	return doly;
 });

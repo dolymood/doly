@@ -247,5 +247,5 @@ define('promise', ['$class'], function() {
         
     });
     doly.Promise = Promise;
-    return Promise;
+    return doly;
 });

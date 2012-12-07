@@ -106,20 +106,20 @@ define('lang_fix', function() {
         }
         return keys;
     });
-	Object.defineOwnProperties || (Object.defineOwnProperties = function(obj, prop) {
+    Object.defineOwnProperties || (Object.defineOwnProperties = function(obj, prop) {
         if (prop && doly.type(prop, 'Object')) {
-		    for (var key in prop) {
-				doly.has(prop, key) && (obj[key] = prop[key]);
-			}
-		}
+            for (var key in prop) {
+                doly.has(prop, key) && (obj[key] = prop[key]);
+            }
+        }
     });
-	Object.create || (Object.create = function(obj, prop) {
+    Object.create || (Object.create = function(obj, prop) {
         var F = function() {}, ret;
-		F.prototype = obj;
-		ret = new F();
-		if (prop !== void 0) {
-		    Object.defineOwnProperties(obj, prop);
-		}
+        F.prototype = obj;
+        ret = new F();
+        if (prop !== void 0) {
+            Object.defineOwnProperties(obj, prop);
+        }
         return ret;
     });
     

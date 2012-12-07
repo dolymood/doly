@@ -2,7 +2,7 @@
  * module node
  */
 
-define('node', ['$support', '$data', '$query'], function(support) {
+define('node', ['$support', '$data', '$query'], function(support, doly) {
     'use strict';
     
     var
@@ -859,5 +859,5 @@ define('node', ['$support', '$data', '$query'], function(support) {
         };
     });
     
-    return node;
+    return doly;
 });

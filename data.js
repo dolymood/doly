@@ -2,7 +2,7 @@
  * module data
  */
 
-define('data', ['$lang'], function() {
+define('data', ['$lang'], function(doly) {
     'use strict';
     
     var rtype = /[^38]/, // 非注释
@@ -149,6 +149,5 @@ define('data', ['$lang'], function() {
     };
     
     doly.mix(doly, retData);
-    return retData;
-    
+    return doly;
 });
