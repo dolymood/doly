@@ -33,13 +33,13 @@ define('promise', ['$class'], function() {
             rnds[6] = (rnds[6] & 0x0f) | 0x40;
             rnds[8] = (rnds[8] & 0x3f) | 0x80;
             return bth[rnds[i++]] + bth[rnds[i++]] +
-            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
-            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
-            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
-            bth[rnds[i++]] + bth[rnds[i++]] + '-' +
-            bth[rnds[i++]] + bth[rnds[i++]] +
-            bth[rnds[i++]] + bth[rnds[i++]] +
-            bth[rnds[i++]] + bth[rnds[i++]];
+                bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+                bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+                bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+                bth[rnds[i++]] + bth[rnds[i++]] + '-' +
+                bth[rnds[i++]] + bth[rnds[i++]] +
+                bth[rnds[i++]] + bth[rnds[i++]] +
+                bth[rnds[i++]] + bth[rnds[i++]];
         },
         Promise;
 
@@ -70,14 +70,15 @@ define('promise', ['$class'], function() {
                         obj.rejectArgs[i] = data.rejectArgs[0];
                     }
                 }
-                // 设置list中的每一个promise对象的uid为当前promise对象的uid
-                // 这样才能在需要的每一个promise对象的状态更改的时候都能够去
-                // 检测一次 是否能够执行成功或者失败的回调函数
+                // 给list的每一个promise对象的references属性
+                // 增加当前的promise对象，这样以后list中的每
+                // 一个promise对象状态更改的时候通过references
+                // 检查当前promise对象是否可以执行回调函数
                 if (ps !== this) {
                     ps.references.push(this);
                 }
             }, this);
-            obj.list = list;
+            obj.list = list; // 当前promise对象所依赖的promise列表
             // 所有的使用当前promise对象的promise对象uid集合
             this.references = [];
             this.uid = uid;
