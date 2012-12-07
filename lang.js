@@ -305,11 +305,6 @@ define('lang', Array.isArray ? [] : ['$lang_fix'], function() {
     };
     
     doly.mixin(lang, true);
-    var nativeBind = Function.prototype.bind;
-    doly.bind = function bind(func, context) {
-        if (!doly.isFunction(func)) doly.error('TypeError: Object #<Object> has no method "bind"');
-        if (func.bind === nativeBind) return nativeBind.apply(func, slice(arguments, 1));        
-    };
 	
     // 改变的原数组
     'pop,push,reverse,shift,sort,splice,unshift'.replace(rword, function(name) {
