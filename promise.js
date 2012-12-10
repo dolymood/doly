@@ -2,7 +2,7 @@
  * module promise
  */
 
-define('promise', ['$class'], function() {
+define('promise', ['$class'], function(doly) {
     'use strict';
     
     var promiseCache = {},
@@ -10,6 +10,7 @@ define('promise', ['$class'], function() {
         RESOLVED = 2,
         REJECTED = 3,
         each = doly.each,
+        // https://github.com/broofa/node-uuid
         _rnds = new Array(16),
         _rng = function() {
             for (var i = 0, r; i < 16; i++) {
@@ -25,7 +26,6 @@ define('promise', ['$class'], function() {
             }
             return ret;
         })(),
-        // https://github.com/broofa/node-uuid
         uuid = function() {
             var i = 0,
                 rnds = _rng(),
@@ -44,13 +44,13 @@ define('promise', ['$class'], function() {
         Promise;
 
     doly.when = function() {
-        return new Promise(doly.slice(arguments));
+        return new doly.Promise(doly.slice(arguments));
     };
     doly.defer = function() {
-        return new Promise();
+        return new doly.Promise();
     };
     
-    Promise = doly.factory({
+    doly.Promise = doly.factory({
         
         init: function(list) {
             var uid = uuid(),
@@ -245,8 +245,7 @@ define('promise', ['$class'], function() {
             }
             return this;
         }
-        
     });
-    doly.Promise = Promise;
+
     return doly;
 });
